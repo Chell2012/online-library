@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Publishers extends Model
+/**
+ * @property int $id Id of categoty
+ * @property string $title Category name
+ */
+class Category extends Model
 {
     use HasFactory;
-    
-    protected $table = 'publishers';
 }

@@ -2,6 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PublisherController;
+use App\Http\Controllers\TagController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +23,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-//Route::middleware('auth:api')->get('/user/get', 'UserController@login');
+Route::middleware('auth:api')->resource('authors', AuthorController::class);
+Route::middleware('auth:api')->resource('books', BookController::class);
+Route::middleware('auth:api')->resource('categories', CategoryController::class);
+Route::middleware('auth:api')->resource('publishers', PublisherController::class);
+Route::middleware('auth:api')->resource('tags', TagController::class);
 
 
