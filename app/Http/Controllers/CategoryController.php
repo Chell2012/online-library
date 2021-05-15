@@ -14,7 +14,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $categoriesList = Category::all('id', 'title');
+        return response()->json(['categories'=>$categoriesList]);
     }
 
     /**
@@ -39,7 +40,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+        return  response()->json(['category'=>$category]);
     }
 
     /**
@@ -51,7 +52,9 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        if ($request->title) {$category->title = $request->title;}
+        $category ->save();
+        return  response()->json(['category'=>$category]);
     }
 
     /**
@@ -62,6 +65,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+        return response()->json(['complete'=>true]);
     }
 }

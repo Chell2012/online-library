@@ -14,7 +14,8 @@ class PublisherController extends Controller
      */
     public function index()
     {
-        //
+        $publishersList = Publisher::all('id', 'title');
+        return response()->json(['publishers'=>$publishersList]);
     }
 
     /**
@@ -39,7 +40,7 @@ class PublisherController extends Controller
      */
     public function show(Publisher $publisher)
     {
-        //
+        return  response()->json(['publisher'=>$publisher]);
     }
 
     /**
@@ -51,7 +52,9 @@ class PublisherController extends Controller
      */
     public function update(Request $request, Publisher $publisher)
     {
-        //
+        if ($request->title) {$publisher->title = $request->title;}
+        $publisher ->save();
+        return  response()->json(['publisher'=>$publisher]);
     }
 
     /**
@@ -62,6 +65,7 @@ class PublisherController extends Controller
      */
     public function destroy(Publisher $publisher)
     {
-        //
+        $publisher->delete();
+        return response()->json(['complete'=>true]);
     }
 }
