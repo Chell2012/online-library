@@ -25,7 +25,7 @@ class CategoryStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title'=>'required|string|max:255',
+            'title'=>'required|unique:App\Models\Category|string|max:255',
         ];
     }
 }

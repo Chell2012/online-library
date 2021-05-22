@@ -25,7 +25,7 @@ class CategoryUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'title'=>'string|max:255',
+            'title'=>'string|unique:App\Models\Category|max:255',
         ];
     }
 }
