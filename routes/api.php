@@ -20,15 +20,11 @@ use App\Http\Controllers\TagController;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+    return $request->user(); 
 });
 
 //TODO: Переделать в Route Groups
-//Route::middleware('auth:api')->resource('authors', AuthorController::class);
-//Route::middleware('auth:api')->resource('books', BookController::class);
-//Route::middleware('auth:api')->resource('categories', CategoryController::class);
-//Route::middleware('auth:api')->resource('publishers', PublisherController::class);
-//Route::middleware('auth:api')->resource('tags', TagController::class);
+
 
 /*
  * Route for authors

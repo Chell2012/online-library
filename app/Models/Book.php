@@ -20,16 +20,32 @@ use Illuminate\Database\Eloquent\Model;
 class Book extends Model
 {
     use HasFactory;
+    
+    //protected $with = ['books_authors', 'books_tags']
+
+
+    protected $fillable =[
+        'title',
+        'publisher_id',
+        'year',
+        'isbn',
+        'category_id',
+        'user_id',
+        'link',
+        'description'
+    ];
+
+
     /**
      * 
-     * @return type
+     * @return BooksTags
      */
     public function tags() {
         return $this->hasMany(BooksTags::class);
     }
     /**
      * 
-     * @return type
+     * @return BooksAuthors
      */
     public function authors() {
         return $this->hasMany(BooksAuthors::class);

@@ -17,6 +17,10 @@ class CreateCategoriesTable extends Migration
             $table->id();
             $table->string('title')->unique();
         });
+        
+        DB::table('categories')->insert(array(
+            'title'=>'Без Категории'
+        ));
     }
 
     /**

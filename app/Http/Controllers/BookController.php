@@ -4,17 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use Illuminate\Http\Request;
-use App\Repositories\BookRepository;
+use App\Services\BookService;
 
 class BookController extends Controller
 {
-    private $bookRepository;
-    
-    public function __construct(BookRepository $bookRepository)
-   {
-       $this->bookRepository = $bookRepository;
-   }
-    
+    private $bookService;
+    public function __construct(BookService $bookService) {
+        $this->bookService=$bookService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -22,8 +19,8 @@ class BookController extends Controller
      */
     public function index()
     {
-        $bookList = $this->bookRepository->all();
-        return response()->json(['books'=>$bookList]);
+        
+        return response()->json($this->bookService->bookList());
     }
 
     /**
@@ -34,31 +31,20 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        $book = new Book;
-        $book->title = $request->title;
-        $book->category_id = $request->category_id;
-        $book->publisher_id = $request->publisher_id;
-        $book->year = $request->year;
-        $book->isbn = $request->isbn;
-        $book->user_id = \Illuminate\Support\Facades\Auth::id();
-        $book->link = $request->link;
-        $book->description = $request->description;
-        $book->save();
-        $tags = explode(',', $request->tags);
-        foreach ($tags as $tag_title){
-            $book->tags()->book_id = $book->id;
-        }
+//        $book = BookService::createBook($request, $this->bookRepository);
+//        return response()->json($book);
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  \App\Models\Book  $book
+     * 
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Book $book)
+    public function show(int $id)
     {
-        //
+        $book = $this->bookService->takeItBook($id);
+        return response()->json($book);
     }
 
     /**
@@ -68,9 +54,9 @@ class BookController extends Controller
      * @param  \App\Models\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Book $book)
+    public function update(int $id, Book $book)
     {
-        //
+        
     }
 
     /**
@@ -79,7 +65,7 @@ class BookController extends Controller
      * @param  \App\Models\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Book $book)
+    public function destroy(int $id)
     {
         //
     }
