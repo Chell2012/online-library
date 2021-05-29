@@ -26,6 +26,16 @@ class CategoryRepository implements CategoryRepositoryInterface {
         return Category::query()->find($id);
     }
     
+    public function getCategoryId(string $categoryTitle): int {
+        
+        $category = $this->getCategoryByTitle($categoryTitle);
+        if ($category===NULL){
+            $category = $this->newCategory($categoryTitle);
+        }
+
+        return $category->id;
+    }
+    
     public function getCategoryByTitle(string $title): ?Category{
         return Category::query()->where('title',$title)->first();
     }

@@ -3,12 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Author;
-use Illuminate\Http\Request;
 use App\Http\Requests\AuthorStoreRequest;
 use App\Http\Requests\AuthorUpdateRequest;
+use App\Repositories\AuthorRepositoryInterface;
 
 class AuthorController extends Controller
 {
+    private $authorRepository;
+    /**
+     * 
+     * @param \App\Http\Controllers\AuthorRepositoryInterface $authorRepository
+     */
+    public function __construct(AuthorRepositoryInterface $authorRepository){
+        $this->authorRepository = $authorRepository;
+    }
+    
+    
     /**
      * Display a listing of the resource.
      *
@@ -16,35 +26,38 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        $authorList = Author::all('id', 'name','middle_name','surname');
+        $authorList = $this->authorRepository->getAll(['id', 'name', 'middle_name', 'surname']);
         return response()->json(['authors'=>$authorList]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\AuthorStoreRequest  $request
-     * @return \Illuminate\Http\Response
+     * 
+     * @param AuthorStoreRequest $request
+     * @return type
      */
     public function store(AuthorStoreRequest $request)
     {
-        $author = new Author;
-        $author->name = $request->name;
-        $author->surname = $request->surname;
-        $author->middle_name = $request->middle_name;
-        $author->save();
+        $author = $this->authorRepository->newAuthor([
+            'name'=>$request->name,
+            'surname' => $request->surname,
+            'middle_name' => $request->middle_name
+        ]);
         return  response()->json(['author'=>$author]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Author  $author
-     * @return \Illuminate\Http\Response
+     * 
+     * @param Author $author
+     * @return type
      */
-    public function show(Author $author)
+    public function show(int $id)
     {
-       return response()->json(['author'=>$author]);
+        $author = $this->authorRepository->getAuthorById($id);
+        return response()->json(['author'=>$author]);
     }
 
     /**
@@ -54,12 +67,13 @@ class AuthorController extends Controller
      * @param  \App\Models\Author  $author
      * @return \Illuminate\Http\Response
      */
-    public function update(AuthorUpdateRequest $request, Author $author)
+    public function update(AuthorUpdateRequest $request, int $id)
     {
-        if ($request->name) {$author->name = $request->name;}
-        if ($request->middle_name) {$author->middle_name = $request->middle_name;}
-        if ($request->surname) {$author->surname = $request->surname;}
-        $author ->save();
+        $author = $this->authorRepository->updateAuthor($id,[
+            'name'=>$request->name,
+            'surname' => $request->surname,
+            'middle_name' => $request->middle_name
+        ]);
         return response()->json(['author'=>$author]);
     }
 
@@ -69,9 +83,9 @@ class AuthorController extends Controller
      * @param  \App\Models\Author  $author
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Author $author)
+    public function destroy(int $id)
     {
-        $author->delete();
-        return response()->json(['complete'=>true]);
+        $complete = $this->authorRepository->deleteAuthor($id);
+        return response()->json(['complete'=>$complete]);
     }
 }

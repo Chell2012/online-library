@@ -18,10 +18,12 @@ use Illuminate\Database\Eloquent\Collection;
 interface AuthorRepositoryInterface {
     /**
      * 
-     * @param type $columns
+     * 
+     * 
+     * @param array $columns
      * @return Collection|null
      */
-    public function getAll($columns = ['*']): ?Collection;
+    public function getAll(array $columns = ['*']): ?Collection;
 
     /**
      * 
@@ -29,6 +31,20 @@ interface AuthorRepositoryInterface {
      * @return Author|null
      */
     public function getAuthorByFullName(array $fullmaster): ?Author;
+    /**
+     * 
+     * 
+     * @param int $id
+     * @param array $fullmaster
+     * @return Author|null
+     */
+    public function updateAuthor(int $id, array $fullmaster): ?Author;
+    /**
+     * 
+     * @param array $fullmaster
+     * @return int
+     */
+    public function getAuthorId(array $fullmaster): int;
     /**
      * 
      * @param int $id
@@ -44,8 +60,7 @@ interface AuthorRepositoryInterface {
     /**
      * 
      * @param int $id
-     * @param array $fullmaster
      * @return bool
      */
-    public function deleteAuthor(int $id, array $fullmaster): bool;
+    public function deleteAuthor(int $id): bool;
 }

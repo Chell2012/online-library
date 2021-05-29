@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class AuthorRepository implements AuthorRepositoryInterface {
     
-    public function getAll($columns = ['*']): ?Collection {
+    public function getAll(array $columns = ['*']): ?Collection {
         return Author::all($columns);
     }
     
@@ -34,19 +34,38 @@ class AuthorRepository implements AuthorRepositoryInterface {
                 ->where('name', $fullmaster["name"])
                 ->first();
     }
-    
-    public function deleteAuthor(int $id, array $fullmaster): bool {
-        if (!($id||$title)) {
-            return false;
+    /**
+     * 
+     * @param int $id
+     * @param array $fullmaster
+     * @return Author|null
+     */
+    public function updateAuthor(int $id, array $fullmaster): ?Author {
+        $author = $this->getAuthorById($id);
+        if (isset($fullmaster['name'])) {$author->name = $fullmaster['name'];}
+        if (isset($fullmaster['middle_name'])) {$author->middle_name = $fullmaster['middle_name'];}
+        if (isset($fullmaster['surname'])) {$author->surname = $fullmaster['surname'];}
+        $author ->save();
+        return $author;
+    }
+    public function getAuthorId(array $fullmaster): int {
+        
+        $author = $this->getAuthorByFullName($fullmaster);
+        
+        if ($author===NULL){
+            $author = $this->newAuthor($fullmaster);
         }
+
+        return $author->id;
+    }
+    
+    public function deleteAuthor(int $id): bool {
         if ($id!=null){
             return $this->getAuthorById($id)->delete();
         }
-        if ($title != null){
-            return $this->getAuthorByFullName($fullmaster)->delete();
-        }
         return false;
     }
+    
     public function newAuthor(array $fullmaster): Author{
         return Author:: query()->create($fullmaster);
     }

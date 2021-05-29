@@ -8,12 +8,13 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\BookStoreRequest;
 use App\Repositories\BookRepositoryInterface;
 use App\Repositories\AuthorRepositoryInterface;
 use App\Repositories\CategoryRepositoryInterface;
 use App\Repositories\PublisherRepositoryInterface;
 use App\Repositories\TagRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -52,155 +53,97 @@ class BookService {
     }
     /**
      * 
-     * @return type
+     * @return array|null
      */
-    public function bookList() {
+    public function bookList(): ?array{
         $bookList = $this->bookRepository->getAll();
-        return ['books'=>$bookList];
+        return isset($bookList)?['books'=>$bookList]:null;
     }
     /**
      * 
      * @param int $id
-     * @return type
+     * @return array|null
      */
-    public function takeItBook(int $id) {
-        //TODO:Заджойнить имена авторов и теги
-        return $this->bookRepository->getBookById($id);
+    public function takeItBook(int $id): ?array {
+        return $this->bookRepository-> takeItBook($id);
     }
 
     /**
      * 
      * @param Request $request
-     * @param BookRepository $bookRepository
-     * @return Book|null
+     * @param int $id
+     * @return array|null
      */
-//    public static function createBook(Request $request): ?Book{
-//        $attributes = [
-//            'title'=>$request->title,
-//            'publisher_id'=> self::getPublisherId($request->publisher),
-//            'year'=>$request->year,
-//            'isbn'=>$request->isbn,
-//            'category_id'=>self::getCategoryId($request->category),
-//            'user_id'=>Auth::id(),
-//            'link'=>$request->link,
-//            'description'=>$request->description
-//        ];
-//        $book = $bookRepository->create($attributes);
-//        $authors = self::setAuthors($request->authors, $bookRepository);
-//        $tags = self::setTags($request->tags, $bookRepository);
-//        If ($authors && $tags){
-//            return $book;
-//        }else{
-//            return NULL;
-//        }
-//        
-//    }
-
-//    private static function setAuthors(string $authors): bool {
-//        //TODO:Обработчик возможных ошибок надо бы сюда
-//        
-//        $executeCheck = true;
-//        foreach (explode(',', $authors) as $author) {
-//            $author = trim($author);
-//            $fullNameArray = explode(' ', $author);
-//            $fullName = [
-//                'surname'=>$fullNameArray[0],
-//                'name'=>$fullNameArray[1],
-//                'middle_name'=> count($fullNameArray)>2? $fullNameArray[2] : NULL
-//            ];
-//            
-//            $authorId = self::getAuthorId($fullName);
-//            
-//            if ($authorId != NULL && $bookRepository->getCurrentId()!=NULL) {
-//                $bookRepository->setBookAuthor($bookRepository->getCurrentId(), $authorId);
-//            } else {
-//                $executeCheck = false;
-//            }
-//        }
-//        return $executeCheck;
-//    }
-    
+    public function setBook(BookStoreRequest $request, int $id = null): ?array{
+        $attributes = [
+            'title'=>$request->title,
+            'publisher_id'=>  isset($request->publisher)?$this->publisherRepository->getPublisherId($request->publisher):null,
+            'year'=>$request->year,
+            'isbn'=>$request->isbn,
+            'category_id'=> isset($request->category)?$this->categoryRepository->getCategoryId($request->category):null,
+            'user_id'=>Auth::id(),
+            'link'=>$request->link,
+            'description'=>$request->description
+        ];
+        if (!isset($id)){
+            $book = $this->bookRepository->newBook($attributes);
+        }
+        else{
+            $book = $this->bookRepository->updateBook($id, $attributes);
+        }
+        if (isset($book)){
+            $authors = $this->setAuthors($book->id, $request->authors);
+            $tags = $this->setTags($book->id, $request->tags);
+            return  [
+            'book'=>$book,
+            'authors'=>$authors,
+            'tags'=>$tags
+            ];
+        }
+        return null;
+    }
     /**
      * 
-     * @param string $tags
-     * @param BookRepository $bookRepository
+     * @param int $id
      * @return bool|null
      */
-//    private static function setTags(string $tags): bool {
-//        //TODO:Обработчик возможных ошибок надо бы сюда
-//        $executeCheck = true;
-//        foreach (explode(',', $tags) as $tag) {
-//            $tagTitle = trim($tag);
-//            $tagId = self::getTagId($tagTitle);
-//            
-//            if ($tagId != NULL && $bookRepository->getCurrentId()!=NULL) {
-//                $bookRepository->setBookTag($bookRepository->getCurrentId(), $tagId);
-//            } else {
-//                $executeCheck = false;
-//            }
-//        }
-//        return $executeCheck;
-//    }
-    
+    public function deleteBook(int $id): ?bool{
+        return isset($id)?$this->bookRepository->deleteBook($id):false;
+    }
+
     /**
      * 
-     * @param type $fullName
-     * @return int|null
+     * @param int $bookId
+     * @param array $authors
+     * @return Collection|null
      */
-    private function getAuthorId(array $fullmaster): int {
-        
-        $author = $this->authorRepository->getAuthorByFullName($fullmaster);
-        
-        if ($author===NULL){
-            $author = $this->authorRepository->newAuthor($fullmaster);
+    private function setAuthors(int $bookId, array $authors = null): ?Collection {
+        $this->bookRepository->deleteBookAuthors($bookId);
+        if($authors!=null){
+            foreach ($authors as $author) {
+                $authorId = $this->authorRepository->getAuthorId($author);
+                $this->bookRepository->setBookAuthor($bookId, $authorId);
+            }
         }
-
-        return $author->id;
+        
+        return $this->bookRepository->getBookAuthors($bookId, true);
     }
     
     /**
      * 
-     * @param array $tagTitle
-     * @return int
+     * @param int $bookId
+     * @param array $tags
+     * @return Collection|null
      */
-    private function getTagId(string $tagTitle): int {
-        
-        $tag = $this->tagRepository->getTagByTitle($tagTitle);
-        if ($tag===NULL){
-            $tag = $this->tagRepository->newTag($tagTitle);
+    private function setTags(int $bookId, array $tags = null): ?Collection {
+        $this->bookRepository->deleteBookTags($bookId);
+        if($tags!=null){
+            foreach ($tags as $tag) {
+                $tagId = $this->tagRepository->getTagId($tag);
+                $this->bookRepository->setBookTag($bookId, $tagId);
+            }
         }
-
-        return $tag->id;
-    }
-    
-    /**
-     * 
-     * @param string $categoryTitle
-     * @return int
-     */
-    private function getCategoryId(string $categoryTitle): int {
-        
-        $category = $this->categoryRepository->getCategoryByTitle($categoryTitle);
-        if ($category===NULL){
-            $category = $this->categoryRepository->newCategory($categoryTitle);
-        }
-
-        return $category->id;
-    }
-    
-    /**
-     * 
-     * @param string $publisherTitle
-     * @return int
-     */
-    private function getPublisherId(string $publisherTitle): int {
-        
-        $publisher = $this->publisherRepository->getPublisherByTitle($publisherTitle);
-        if ($publisher===NULL){
-            $publisher = $this->publisherRepository->newPublisher($publisherTitle);
-        }
-
-        return $publisher->id;
+        return $this->bookRepository->getBookTags($bookId, true);
     }
 
 }

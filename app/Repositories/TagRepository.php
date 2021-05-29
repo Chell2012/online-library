@@ -27,6 +27,16 @@ class TagRepository implements TagRepositoryInterface {
         return Tag::query()->find($id);
     }
     
+    public function getTagId(string $tagTitle): int {
+        
+        $tag = $this->getTagByTitle($tagTitle);
+        if ($tag===NULL){
+            $tag = $this->newTag($tagTitle);
+        }
+
+        return $tag->id;
+    }
+    
     public function getTagByTitle(string $title): ?Tag{
         return Tag::query()->where('title',$title)->first();
     }

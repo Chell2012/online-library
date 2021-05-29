@@ -30,6 +30,12 @@ interface CategoryRepositoryInterface {
     public function getCategoryByTitle(string $title): ?Category;
     /**
      * 
+     * @param string $categoryTitle
+     * @return int
+     */
+    public function getCategoryId(string $categoryTitle): int;
+    /**
+     * 
      * @param int $id
      * @return Category|null
      */

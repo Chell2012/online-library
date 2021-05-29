@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Book;
-use Illuminate\Http\Request;
+use App\Http\Requests\BookStoreRequest;
 use App\Services\BookService;
 
 class BookController extends Controller
@@ -19,7 +18,6 @@ class BookController extends Controller
      */
     public function index()
     {
-        
         return response()->json($this->bookService->bookList());
     }
 
@@ -29,10 +27,10 @@ class BookController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BookStoreRequest $request)
     {
-//        $book = BookService::createBook($request, $this->bookRepository);
-//        return response()->json($book);
+        $bookArray = $this->bookService->setBook($request);
+        return response()->json($bookArray);
     }
 
     /**
@@ -54,9 +52,10 @@ class BookController extends Controller
      * @param  \App\Models\Book  $book
      * @return \Illuminate\Http\Response
      */
-    public function update(int $id, Book $book)
+    public function update(int $id, BookStoreRequest $request)
     {
-        
+        $bookArray = $this->bookService->setBook($request, $id);
+        return response()->json($bookArray);
     }
 
     /**
@@ -67,6 +66,7 @@ class BookController extends Controller
      */
     public function destroy(int $id)
     {
-        //
+        $complete = $this->bookService->deleteBook($id);
+        return response()->json(['complete'=>$complete]);
     }
 }

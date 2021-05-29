@@ -30,6 +30,12 @@ interface PublisherRepositoryInterface {
     public function getPublisherByTitle(string $title): ?Publisher;
     /**
      * 
+     * @param string $publisherTitle
+     * @return int
+     */
+    public function getPublisherId(string $publisherTitle): int;
+    /**
+     * 
      * @param int $id
      * @return Publisher|null
      */

@@ -28,6 +28,14 @@ interface TagRepositoryInterface {
      * @return Tag|null
      */
     public function getTagByTitle(string $title): ?Tag;
+    
+    /**
+     * 
+     * @param string $tagTitle
+     * @return int
+     */
+    public function getTagId(string $tagTitle): int; 
+    
     /**
      * 
      * @param int $id

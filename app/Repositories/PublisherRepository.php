@@ -25,6 +25,15 @@ class PublisherRepository implements PublisherRepositoryInterface {
     public function getPublisherById(int $id): ?Publisher {
         return Publisher::query()->find($id);
     }
+    public function getPublisherId(string $publisherTitle): int {
+        
+        $publisher = $this->getPublisherByTitle($publisherTitle);
+        if ($publisher===NULL){
+            $publisher = $this->newPublisher($publisherTitle);
+        }
+
+        return $publisher->id;
+    }
     
     public function getPublisherByTitle(string $title): ?Publisher{
         return Publisher::query()->where('title',$title)->first();

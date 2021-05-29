@@ -25,8 +25,8 @@ class AuthorUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'=>'string|max:50',
-            'surname'=>'string|max:50',
+            'name'=>'required|string|max:50',
+            'surname'=>'required|string|max:50',
             'middle_name'=>'string|max:50',
         ];
     }
