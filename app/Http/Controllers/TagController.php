@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tag;
-use Illuminate\Http\Request;
 use App\Http\Requests\TagsStoreRequest;
 use App\Http\Requests\TagsUpdateRequest;
+use App\Repositories\TagRepositoryInterface;
 
 class TagController extends Controller
 {
+    private $tagRepository;
+    /**
+     * 
+     * @param TagRepositoryInterface $tagRepository
+     */
+    public function __construct(TagRepositoryInterface $tagRepository){
+        $this->tagRepository = $tagRepository;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -16,10 +24,8 @@ class TagController extends Controller
      */
     public function index()
     {
-        $tagsList = Tag::all('id', 'title');
-        return response()->json(['tags'=>$tagsList]);
+        return response()->json($this->tagRepository->getAll());
     }
-
     /**
      * Store a newly created resource in storage.   
      *
@@ -28,13 +34,8 @@ class TagController extends Controller
      */
     public function store(TagsStoreRequest $request)
     {
-        $tag = new Tag;
-        $tag->title = $request->title;
-        $tag->category_id = $request->category_id;
-        $tag->save();
-        return  response()->json(['tag'=>$tag]);
+        return response()->json($this->tagRepository->new($request->title, $request->category_id));
     }
-
     /**
      * Display the specified resource.
      *
@@ -43,24 +44,19 @@ class TagController extends Controller
      */
     public function show(Tag $tag)
     {
-        return  response()->json(['tag'=>$tag]);
+        return  response()->json($this->tagRepository->getById($tag->id));
     }
-
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\TagsUpdateRequest  $request
      * @param  \App\Models\Tag  $tag
      * @return \Illuminate\Http\Response
      */
     public function update(TagsUpdateRequest $request, Tag $tag)
     {
-        if ($request->title) {$tag->title = $request->title;}
-        if ($request->category_id) {$tag->category_id = $request->category_id;}
-        $tag ->save();
-        return  response()->json(['tag'=>$tag]);
+        return response()->json($this->tagRepository->update($tag->id, $request->title, $request->category_id));
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -69,7 +65,6 @@ class TagController extends Controller
      */
     public function destroy(Tag $tag)
     {
-        $tag->delete();
-        return response()->json(['complete'=>true]);
+        return response()->json($this->tagRepository->delete($tag->id));
     }
 }

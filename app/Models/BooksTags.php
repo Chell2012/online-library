@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Book;
 use App\Models\Tag;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $book_id 
@@ -23,15 +24,22 @@ class BooksTags extends Model
     ];
     
     public $timestamps = false;
-    
-    public function book() {
+    /**
+     * Relation with book record
+     * 
+     * @return BelongsTo
+     */
+    public function book(): BelongsTo
+    {
         return $this->belongsTo(Book::class);
     }
     /**
+     * Relation with tag record
      * 
-     * @return type
+     * @return BelongsTo
      */
-    public function tag() {
+    public function tag(): BelongsTo
+    {
         return $this->belongsTo(Tag::class);
     }
 }

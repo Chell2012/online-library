@@ -4,9 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Repositories\CategoryRepositoryInterface;
+use App\Http\Requests\CategoryStoreRequest;
+use App\Http\Requests\CategoryUpdateRequest;
 
 class CategoryController extends Controller
 {
+    private $categoryRepository;
+    /**
+     * 
+     * @param CategoryRepositoryInterface $categoryRepository
+     */
+    public function __construct(CategoryRepositoryInterface $categoryRepository){
+        $this->categoryRepository = $categoryRepository;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,8 +25,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categoriesList = Category::all('id', 'title');
-        return response()->json(['categories'=>$categoriesList]);
+        return response()->json($this->categoryRepository->getAll());
     }
 
     /**
@@ -24,12 +34,9 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CategoryStoreRequest $request)
     {
-        $category = new Category;
-        $category -> title = $request->title;
-        $category -> save();
-        return $category;
+        return response()->json($this->categoryRepository->new($request->title));
     }
 
     /**
@@ -40,7 +47,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        return  response()->json(['category'=>$category]);
+        return  response()->json($this->categoryRepository->getById($category->id));
     }
 
     /**
@@ -50,11 +57,9 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(CategoryUpdateRequest $request, Category $category)
     {
-        if ($request->title) {$category->title = $request->title;}
-        $category ->save();
-        return  response()->json(['category'=>$category]);
+        return  response()->json($this->categoryRepository->update($category->id, $request->title));
     }
 
     /**
@@ -65,7 +70,6 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        $category->delete();
-        return response()->json(['complete'=>true]);
+        return response()->json($this->categoryRepository->delete($category->id));
     }
 }

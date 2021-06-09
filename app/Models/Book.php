@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id book id
@@ -21,9 +22,7 @@ class Book extends Model
 {
     use HasFactory;
     
-    //protected $with = ['books_authors', 'books_tags']
-
-
+    //protected $with = ['books_authors', 'books_tags'];
     protected $fillable =[
         'title',
         'publisher_id',
@@ -34,21 +33,21 @@ class Book extends Model
         'link',
         'description'
     ];
-
-
+    
     /**
-     * 
-     * @return BooksTags
+     * Relation with tags list
+     * @return HasMany
      */
-    public function tags() {
+    public function tags(): HasMany
+    {
         return $this->hasMany(BooksTags::class);
     }
     /**
-     * 
-     * @return BooksAuthors
+     * Relation with authors list
+     * @return HasMany
      */
-    public function authors() {
+    public function authors(): HasMany
+    {
         return $this->hasMany(BooksAuthors::class);
-    }
-    
+    }   
 }

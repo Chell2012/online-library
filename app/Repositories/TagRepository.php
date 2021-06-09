@@ -11,53 +11,77 @@ namespace App\Repositories;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
 
-
 /**
  * Description of PublisherRepository
  *
  * @author vyacheslav
  */
-class TagRepository implements TagRepositoryInterface {
-    
-    public function getAll($columns = ['*']): ?Collection {
+class TagRepository implements TagRepositoryInterface
+{
+    /**
+     * Return collection of records
+     * 
+     * @param array|mixed $columns
+     * @return Collection|null
+     */
+    public function getAll($columns = ['*']): ?Collection
+    {
         return Tag::all($columns);
     }
-    
-    public function getTagById(int $id): ?Tag {
+    /**
+     * Return record if it exists
+     * 
+     * @param int $id
+     * @return Tag|null
+     */
+    public function getById(int $id): ?Tag
+    {
         return Tag::query()->find($id);
     }
-    
-    public function getTagId(string $tagTitle): int {
-        
-        $tag = $this->getTagByTitle($tagTitle);
-        if ($tag===NULL){
-            $tag = $this->newTag($tagTitle);
-        }
-
-        return $tag->id;
-    }
-    
-    public function getTagByTitle(string $title): ?Tag{
-        return Tag::query()->where('title',$title)->first();
-    }
-    
-    public function deleteTag($id = null, $title = null): bool {
-        if (!($id||$title)) {
-            return false;
-        }
+    /**
+     * Delete record if it exists
+     * 
+     * @param type $id
+     * @return bool
+     */
+    public function delete($id): bool
+    {
         if ($id!=null){
-            return $this->getTagById($id)->delete();
-        }
-        if ($title != null){
-            return $this->getTagByTitle($title)->delete();
+            return $this->getById($id)->delete();
         }
         return false;
     }
-    
-    public function newTag(array $tagParams): Tag{
-        if (!isset($tagParams["category"])){
-            $tagParams["category"]=1;
+    /**
+     * Create new record
+     * 
+     * @param string $title
+     * @param int $categoryId
+     * @return Tag
+     */
+    public function new(string $title, int $categoryId = null): Tag
+    {
+        if ($categoryId === null){
+            $categoryId = 1;
         }
-        return Tag::query()->create($tagParams);
+        return Tag::query()->create([
+            'title' => $title,
+            'category_id' => $categoryId
+        ]);
+    }
+    /**
+     * Update record if it exists
+     * 
+     * @param int $id
+     * @param string $title
+     * @param int $categoryId
+     * @return Tag|null
+     */
+    public function update(int $id, string $title, int $categoryId): ?Tag
+    {   
+        $tag = Tag::query()->find($id);
+        $tag->category_id = $categoryId;
+        $tag->title = $title;
+        $tag->save();
+        return $tag;
     }
 }

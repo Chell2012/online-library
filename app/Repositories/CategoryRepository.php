@@ -16,43 +16,63 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @author vyacheslav
  */
-class CategoryRepository implements CategoryRepositoryInterface {
-    
-    public function getAll($columns = ['*']): ?Collection {
+class CategoryRepository implements CategoryRepositoryInterface
+{
+    /**
+     * Return collection of records
+     * 
+     * @param array|mixed $columns
+     * @return Collection|null
+     */
+    public function getAll($columns = ['*']): ?Collection
+    {
         return Category::all($columns);
     }
-    
-    public function getCategoryById(int $id): ?Category {
+    /**
+     * Return record if it exists
+     * 
+     * @param int $id
+     * @return Category|null
+     */
+    public function getById(int $id): ?Category
+    {
         return Category::query()->find($id);
     }
-    
-    public function getCategoryId(string $categoryTitle): int {
-        
-        $category = $this->getCategoryByTitle($categoryTitle);
-        if ($category===NULL){
-            $category = $this->newCategory($categoryTitle);
-        }
-
-        return $category->id;
-    }
-    
-    public function getCategoryByTitle(string $title): ?Category{
-        return Category::query()->where('title',$title)->first();
-    }
-    
-    public function deleteCategory($id = null, $title = null): bool {
-        if (!($id||$title)) {
-            return false;
-        }
+    /**
+     * Delete record if it exists
+     * 
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool
+    {
         if ($id!=null){
             return Category::query()->find($id)->delete();
         }
-        if ($title != null){
-            return Category::query()->where('title',$title)->first()->delete();
-        }
         return false;
     }
-    public function newCategory(string $title): Category{
-        return Category:: query()->create(['title'=>$title]);
+    /**
+     * Create new record
+     * 
+     * @param string $title
+     * @return Category
+     */
+    public function new(string $title): Category
+    {
+        return Category::query()->create(['title'=>$title]);
+    }
+    /**
+     * Update record if it exists
+     * 
+     * @param int $id
+     * @param string $title
+     * @return Category|null
+     */
+    public function update(int $id, string $title): ?Category
+    {
+        $category = Category::query()->find($id);
+        $category->title = $title;
+        $category->save();
+        return $category;
     }
 }

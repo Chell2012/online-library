@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BookStoreRequest;
 use App\Services\BookService;
+use App\DTO\BookDataTransferObject;
 
 class BookController extends Controller
 {
     private $bookService;
-    public function __construct(BookService $bookService) {
+    
+    public function __construct(BookService $bookService)
+    {
         $this->bookService=$bookService;
     }
     /**
@@ -18,9 +21,8 @@ class BookController extends Controller
      */
     public function index()
     {
-        return response()->json($this->bookService->bookList());
+        return response()->json($this->bookService->list());
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -29,10 +31,20 @@ class BookController extends Controller
      */
     public function store(BookStoreRequest $request)
     {
-        $bookArray = $this->bookService->setBook($request);
+        $bookDTO = new BookDataTransferObject(
+                $request->title,
+                $request->publisher_id,
+                $request->year,
+                $request->isbn,
+                $request->category_id,
+                $request->link,
+                $request->description,
+                $request->author_id,
+                $request->tag_id
+                );
+        $bookArray = $this->bookService->new($bookDTO);
         return response()->json($bookArray);
     }
-
     /**
      * Display the specified resource.
      * 
@@ -41,32 +53,39 @@ class BookController extends Controller
      */
     public function show(int $id)
     {
-        $book = $this->bookService->takeItBook($id);
-        return response()->json($book);
+        return response()->json($this->bookService->getWithRelations($id));
     }
-
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Book  $book
-     * @return \Illuminate\Http\Response
+     * 
+     * @param int $id
+     * @param BookStoreRequest $request
+     * @return type
      */
     public function update(int $id, BookStoreRequest $request)
     {
-        $bookArray = $this->bookService->setBook($request, $id);
+        
+        $bookArray = $this->bookService->update(new BookDataTransferObject(
+                $request->title,
+                $request->publisher_id,
+                $request->year,
+                $request->isbn,
+                $request->category_id,
+                $request->link,
+                $request->description,
+                $request->author_id,
+                $request->tag_id
+                ), $id);
         return response()->json($bookArray);
     }
-
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Book  $book
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy(int $id)
     {
-        $complete = $this->bookService->deleteBook($id);
-        return response()->json(['complete'=>$complete]);
+        return response()->json($this->bookService->delete($id));
     }
 }

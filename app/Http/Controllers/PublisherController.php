@@ -4,9 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Publisher;
 use Illuminate\Http\Request;
+use \App\Repositories\PublisherRepositoryInterface;
+use App\Http\Requests\PublisherStoreRequest;
+use App\Http\Requests\PublisherUpdateRequest;
 
 class PublisherController extends Controller
 {
+    private $publisherRepository;
+    /**
+     * 
+     * @param PublisherRepositoryInterface $publisherRepository
+     */
+    public function __construct(PublisherRepositoryInterface $publisherRepository){
+        $this->publisherRepository = $publisherRepository;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,8 +25,7 @@ class PublisherController extends Controller
      */
     public function index()
     {
-        $publishersList = Publisher::all('id', 'title');
-        return response()->json(['publishers'=>$publishersList]);
+        return response()->json($this->publisherRepository->getAll());
     }
 
     /**
@@ -24,48 +34,43 @@ class PublisherController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PublisherStoreRequest $request)
     {
-        $publisher = new Publisher;
-        $publisher->title = $request->title;
-        $publisher->save();
-        return $publisher;
+        return response()->json($this->publisherRepository->new($request->title));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Publisher  $publisher
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Publisher $publisher)
+    public function show(int $id)
     {
-        return  response()->json(['publisher'=>$publisher]);
+        return  response()->json($this->publisherRepository->getById($id));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Publisher  $publisher
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Publisher $publisher)
+    public function update(PublisherUpdateRequest $request, int $id)
     {
-        if ($request->title) {$publisher->title = $request->title;}
-        $publisher ->save();
-        return  response()->json(['publisher'=>$publisher]);
+        $publisher = $this->publisherRepository->update($id, $request->title);
+        return  response()->json($publisher);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Publisher  $publisher
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Publisher $publisher)
+    public function destroy(int $id)
     {
-        $publisher->delete();
-        return response()->json(['complete'=>true]);
+        return response()->json($this->publisherRepository->delete($id));
     }
 }

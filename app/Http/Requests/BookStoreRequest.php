@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class BookStoreRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class BookStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::check();
     }
 
     /**
@@ -25,18 +26,16 @@ class BookStoreRequest extends FormRequest
     {
         return [
             'title'=>'required|string|max:100',
-            'publisher'=> 'required|string|max:50',
+            'publisher_id'=> 'required|integer|exists:App\Models\Publisher,id',
             'year'=>'integer|required|max:'.date("Y"),
             'isbn'=>'string|nullable|max:17',//TODO: поправить в бд. сделать nullable 
-            'category'=> 'string|max:50',//TODO: сделать значение по умолчанию и добавить nullable 
+            'category_id'=> 'nullable|integer|exists:App\Models\Category,id',
             'link'=>'required|string|max:255',
             'description'=>'required|string|max:255',
-            'tags'=>'array|nullable',
-            'tags.*'=>'string|max:50',
-            'authors'=>'array|nullable',
-            'authors.*.surname'=>'string|max:50',
-            'authors.*.name'=>'string|max:50',
-            'authors.*.middle_name'=>'string|nullable|max:50'
+            'tag_id'=>'array|nullable',
+            'tag_id.*'=>'integer|exists:App\Models\Tag,id',
+            'author_id'=>'array|nullable',
+            'author_id.*'=>'integer|exists:App\Models\Author,id'
         ];
     }
 }

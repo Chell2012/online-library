@@ -15,42 +15,42 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @author vyacheslav
  */
-interface CategoryRepositoryInterface {
+interface CategoryRepositoryInterface
+{
     /**
+     * Return collection of records
      * 
-     * @param type $columns
+     * @param mixed|array $columns
      * @return Collection|null
      */
     public function getAll($columns): ?Collection;
     /**
-     * 
-     * @param string $title
-     * @return Category|null
-     */
-    public function getCategoryByTitle(string $title): ?Category;
-    /**
-     * 
-     * @param string $categoryTitle
-     * @return int
-     */
-    public function getCategoryId(string $categoryTitle): int;
-    /**
+     * Return record if it exists
      * 
      * @param int $id
      * @return Category|null
      */
-    public function getCategoryById(int $id): ?Category;
+    public function getById(int $id): ?Category;
     /**
+     * Create new record
      * 
      * @param string $title
      * @return Category
      */
-    public function newCategory(string $title): Category;
+    public function new(string $title): Category;
     /**
+     * Update record if it exists
      * 
      * @param int $id
      * @param string $title
+     * @return Category|null
+     */
+    public function update(int $id, string $title): ?Category;
+    /**
+     * Delete record if it exists
+     * 
+     * @param int $id
      * @return bool
      */
-    public function deleteCategory(int $id, string $title): bool;
+    public function delete(int $id): bool;
 }

@@ -16,43 +16,63 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @author vyacheslav
  */
-class PublisherRepository implements PublisherRepositoryInterface {
-    
-    public function getAll($columns = ['*']): ?Collection {
+class PublisherRepository implements PublisherRepositoryInterface 
+{
+    /**
+     * Return collection of records
+     * 
+     * @param type $columns
+     * @return Collection|null
+     */
+    public function getAll($columns = ['*']): ?Collection 
+    {
         return Publisher::all($columns);
     }
-    
-    public function getPublisherById(int $id): ?Publisher {
+    /**
+     * Return record if it exists
+     * 
+     * @param int $id
+     * @return Publisher|null
+     */
+    public function getById(int $id): ?Publisher
+    {
         return Publisher::query()->find($id);
     }
-    public function getPublisherId(string $publisherTitle): int {
-        
-        $publisher = $this->getPublisherByTitle($publisherTitle);
-        if ($publisher===NULL){
-            $publisher = $this->newPublisher($publisherTitle);
-        }
-
-        return $publisher->id;
-    }
-    
-    public function getPublisherByTitle(string $title): ?Publisher{
-        return Publisher::query()->where('title',$title)->first();
-    }
-    
-    public function deletePublisher($id = null, $title = null): bool {
-        if (!($id||$title)) {
-            return false;
-        }
+    /**
+     * Delete record if it exists
+     * 
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool
+    {
         if ($id!=null){
-            return $this->getPublisherById($id)->delete();
-        }
-        if ($title != null){
-            return $this->getPublisherByTitle($title)->delete();
+            return $this->getById($id)->delete();
         }
         return false;
     }
-    
-    public function newPublisher(string $title): Publisher{
-        return Publisher:: query()->create(['title'=>$title]);
+    /**
+     * Create new record
+     * 
+     * @param string $title
+     * @return Publisher
+     */
+    public function new(string $title): Publisher
+    {
+        return Publisher::query()->create(['title'=>$title]);
+    }
+    /**
+     * Update record if it exists
+     * 
+     * @param int $id
+     * @param string $title
+     * @return Publisher|null
+     */
+    public function update(int $id, string $title): ?Publisher
+    {
+        $publisher = Publisher::query()->find($id);
+        $publisher->title = $title;
+        $publisher->save();
+        return $publisher;
     }
 }

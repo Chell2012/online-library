@@ -17,40 +17,38 @@ use Illuminate\Database\Eloquent\Collection;
  */
 interface PublisherRepositoryInterface {
     /**
+     * Return collection of records
      * 
-     * @param type $columns
+     * @param array|mixed $columns
      * @return Collection|null
      */
     public function getAll($columns): ?Collection;
     /**
-     * 
-     * @param string $title
-     * @return Publisher|null
-     */
-    public function getPublisherByTitle(string $title): ?Publisher;
-    /**
-     * 
-     * @param string $publisherTitle
-     * @return int
-     */
-    public function getPublisherId(string $publisherTitle): int;
-    /**
+     * Return record if it exists
      * 
      * @param int $id
      * @return Publisher|null
      */
-    public function getPublisherById(int $id): ?Publisher;
+    public function getById(int $id): ?Publisher;
     /**
      * 
      * @param string $title
      * @return Publisher
      */
-    public function newPublisher(string $title): Publisher;
-    /**
+    public function new(string $title): Publisher;
+     /**
+     * Update record if it exists
      * 
      * @param int $id
      * @param string $title
+     * @return Publisher|null
+     */
+    public function update(int $id, string $title): ?Publisher;
+    /**
+     * Delete record if it exists
+     * 
+     * @param int $id
      * @return bool
      */
-    public function deletePublisher(int $id, string $title): bool;
+    public function delete(int $id): bool;
 }

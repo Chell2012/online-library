@@ -15,44 +15,44 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @author vyacheslav
  */
-interface TagRepositoryInterface {
+interface TagRepositoryInterface
+{
     /**
+     * Return collection of records
      * 
-     * @param type $columns
+     * @param array|mixed $columns
      * @return Collection|null
      */
-    public function getAll($columns): ?Collection;
+    public function getAll($columns = ['*']): ?Collection;
     /**
-     * 
-     * @param string $title
-     * @return Tag|null
-     */
-    public function getTagByTitle(string $title): ?Tag;
-    
-    /**
-     * 
-     * @param string $tagTitle
-     * @return int
-     */
-    public function getTagId(string $tagTitle): int; 
-    
-    /**
+     * Return record if it exists
      * 
      * @param int $id
      * @return Tag|null
      */
-    public function getTagById(int $id): ?Tag;
+    public function getById(int $id): ?Tag;
     /**
+     * Create new record
      * 
-     * @param array $tagParams
-     * @return Tag|null
+     * @param string $title
+     * @param int $categoryId
+     * @return Tag
      */
-    public function newTag(array $tagParams): Tag;
+    public function new(string $title, int $categoryId = null): Tag;
     /**
+     * Update record if it exists
      * 
      * @param int $id
      * @param string $title
+     * @param int $categoryId
+     * @return Tag|null
+     */
+    public function update(int $id, string $title, int $categoryId): ?Tag;
+    /**
+     * Delete record if it exists
+     * 
+     * @param int $id
      * @return bool
      */
-    public function deleteTag(int $id, string $title): bool;
+    public function delete(int $id): bool;
 }

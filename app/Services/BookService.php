@@ -8,7 +8,6 @@
 
 namespace App\Services;
 
-use App\Http\Requests\BookStoreRequest;
 use App\Repositories\BookRepositoryInterface;
 use App\Repositories\AuthorRepositoryInterface;
 use App\Repositories\CategoryRepositoryInterface;
@@ -16,14 +15,15 @@ use App\Repositories\PublisherRepositoryInterface;
 use App\Repositories\TagRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use App\DTO\BookDataTransferObject;
 
 /**
  * Description of BookService
  *
  * @author vyacheslav
  */
-class BookService {
-    
+class BookService 
+{
     private $bookRepository;
     private $authorRepository;
     private $categoryRepository;
@@ -39,12 +39,12 @@ class BookService {
      * @param TagRepositoryInterface $tagRepository
      */
     public function __construct(
-            BookRepositoryInterface $bookRepository,
-            AuthorRepositoryInterface $authorRepository,
-            CategoryRepositoryInterface $categoryRepository,
-            PublisherRepositoryInterface $publisherRepository,
-            TagRepositoryInterface $tagRepository
-            ) {
+        BookRepositoryInterface $bookRepository,
+        AuthorRepositoryInterface $authorRepository,
+        CategoryRepositoryInterface $categoryRepository,
+        PublisherRepositoryInterface $publisherRepository,
+        TagRepositoryInterface $tagRepository
+    ){
         $this->bookRepository = $bookRepository;
         $this->authorRepository = $authorRepository;
         $this->categoryRepository = $categoryRepository;
@@ -52,98 +52,109 @@ class BookService {
         $this->tagRepository = $tagRepository;
     }
     /**
+     * Return collection of records
      * 
-     * @return array|null
+     * @return Collection|null  
      */
-    public function bookList(): ?array{
-        $bookList = $this->bookRepository->getAll();
-        return isset($bookList)?['books'=>$bookList]:null;
+    public function list(): ?Collection
+    {
+        return $this->bookRepository->getAll();
     }
     /**
+     * Return book with tags and authors
      * 
      * @param int $id
      * @return array|null
      */
-    public function takeItBook(int $id): ?array {
-        return $this->bookRepository-> takeItBook($id);
+    public function getWithRelations(int $id): ?array
+    {
+        return $this->bookRepository->getWithRelations($id);
     }
-
     /**
+     * Create new book and relations
      * 
-     * @param Request $request
-     * @param int $id
+     * @param BookDataTransferObject $bookDTO
      * @return array|null
      */
-    public function setBook(BookStoreRequest $request, int $id = null): ?array{
-        $attributes = [
-            'title'=>$request->title,
-            'publisher_id'=>  isset($request->publisher)?$this->publisherRepository->getPublisherId($request->publisher):null,
-            'year'=>$request->year,
-            'isbn'=>$request->isbn,
-            'category_id'=> isset($request->category)?$this->categoryRepository->getCategoryId($request->category):null,
-            'user_id'=>Auth::id(),
-            'link'=>$request->link,
-            'description'=>$request->description
+    public function new(BookDataTransferObject $bookDTO): ?array
+    {
+        $book = $this->bookRepository->new(Auth::id(), $bookDTO);
+        if (!isset($book)){
+            return null;
+        }
+        $authors = $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
+        $tags = $this->setTags($book->id, $bookDTO->getTagsIds());
+        return  [
+        'book'=>$book,
+        'authors'=>$authors,
+        'tags'=>$tags
         ];
-        if (!isset($id)){
-            $book = $this->bookRepository->newBook($attributes);
+    }
+    /**
+     * Update book and relations if it exists
+     * 
+     * @param BookDataTransferObject $bookDTO
+     * @param int $id
+     * @return array|null
+     */
+    public function update(BookDataTransferObject $bookDTO, int $id): ?array
+    {
+        $book = $this->bookRepository->update($id, Auth::id(), $bookDTO);
+        if (!isset($book)){
+            return null;
         }
-        else{
-            $book = $this->bookRepository->updateBook($id, $attributes);
-        }
-        if (isset($book)){
-            $authors = $this->setAuthors($book->id, $request->authors);
-            $tags = $this->setTags($book->id, $request->tags);
-            return  [
-            'book'=>$book,
-            'authors'=>$authors,
-            'tags'=>$tags
-            ];
-        }
-        return null;
+        $authors = $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
+        $tags = $this->setTags($book->id, $bookDTO->getTagsIds());
+        return  [
+        'book'=>$book,
+        'authors'=>$authors,
+        'tags'=>$tags
+        ];
     }
     /**
      * 
      * @param int $id
      * @return bool|null
      */
-    public function deleteBook(int $id): ?bool{
-        return isset($id)?$this->bookRepository->deleteBook($id):false;
+    public function delete(int $id): ?bool
+    {
+        return isset($id)?$this->bookRepository->delete($id):false;
     }
 
     /**
+     * Create book-author relations
      * 
      * @param int $bookId
      * @param array $authors
      * @return Collection|null
      */
-    private function setAuthors(int $bookId, array $authors = null): ?Collection {
-        $this->bookRepository->deleteBookAuthors($bookId);
+    private function setAuthors(int $bookId, array $authors = null): ?Collection
+    {
+        $this->bookRepository->deleteAuthorRelations($bookId);
         if($authors!=null){
-            foreach ($authors as $author) {
-                $authorId = $this->authorRepository->getAuthorId($author);
-                $this->bookRepository->setBookAuthor($bookId, $authorId);
+            foreach ($authors as $authorId) {
+                $this->bookRepository->setAuthorRelation($bookId, $authorId);
             }
         }
         
-        return $this->bookRepository->getBookAuthors($bookId, true);
+        return $this->bookRepository->getAuthorRelations($bookId, true);
     }
     
     /**
+     * Create book-tag relations
      * 
      * @param int $bookId
      * @param array $tags
      * @return Collection|null
      */
-    private function setTags(int $bookId, array $tags = null): ?Collection {
-        $this->bookRepository->deleteBookTags($bookId);
+    private function setTags(int $bookId, array $tags = null): ?Collection
+    {
+        $this->bookRepository->deleteTagRelations($bookId);
         if($tags!=null){
-            foreach ($tags as $tag) {
-                $tagId = $this->tagRepository->getTagId($tag);
-                $this->bookRepository->setBookTag($bookId, $tagId);
+            foreach ($tags as $tagId) {
+                $this->bookRepository->setTagRelation($bookId, $tagId);
             }
         }
-        return $this->bookRepository->getBookTags($bookId, true);
+        return $this->bookRepository->getTagRelations($bookId, true);
     }
-
 }

@@ -10,63 +10,81 @@ namespace App\Repositories;
 
 use App\Models\Author;
 use Illuminate\Database\Eloquent\Collection;
+use App\DTO\AuthorDataTransferObject;
 
 /**
- * Description of PublisherRepository
+ * Repository for Author table
  *
  * @author vyacheslav
  */
-class AuthorRepository implements AuthorRepositoryInterface {
-    
-    public function getAll(array $columns = ['*']): ?Collection {
+class AuthorRepository implements AuthorRepositoryInterface 
+{
+    /**
+     * Return collection of records
+     * 
+     * @param array $columns
+     * @return Collection|null
+     */
+    public function getAll(array $columns = ['*']): ?Collection
+    {
         return Author::all($columns);
     }
-    
-    public function getAuthorById(int $id): ?Author {
-        return Author::query()->find($id);
-    }
-    
-    public function getAuthorByFullName(array $fullmaster): ?Author{
-        return Author::query()
-                ->where('surname', $fullmaster["surname"])
-                ->where('middle_name', isset($fullmaster["middle_name"])?
-                    $fullmaster["middle_name"]:null)
-                ->where('name', $fullmaster["name"])
-                ->first();
-    }
     /**
+     * Return record if it exists
      * 
      * @param int $id
-     * @param array $fullmaster
      * @return Author|null
      */
-    public function updateAuthor(int $id, array $fullmaster): ?Author {
-        $author = $this->getAuthorById($id);
-        if (isset($fullmaster['name'])) {$author->name = $fullmaster['name'];}
-        if (isset($fullmaster['middle_name'])) {$author->middle_name = $fullmaster['middle_name'];}
-        if (isset($fullmaster['surname'])) {$author->surname = $fullmaster['surname'];}
-        $author ->save();
-        return $author;
+    public function getById(int $id): ?Author
+    {
+        return Author::query()->find($id);
     }
-    public function getAuthorId(array $fullmaster): int {
-        
-        $author = $this->getAuthorByFullName($fullmaster);
-        
-        if ($author===NULL){
-            $author = $this->newAuthor($fullmaster);
+    /**
+     * Return upadted record if it exists
+     * 
+     * @param int $id
+     * @param array $author
+     * @return Author|null
+     */
+    public function update(int $id, AuthorDataTransferObject $author): ?Author
+    {
+        $record = $this->getById($id);
+        if ($record === null){
+            return null;
         }
-
-        return $author->id;
+        $record->name = $author->getName();
+        if ($author->getMiddleName()!=null){
+            $record->middle_name = $author->getMiddleName();
+        }
+        $record->surname = $author->getSurame();
+        $record->save();
+        return $record;
     }
-    
-    public function deleteAuthor(int $id): bool {
-        if ($id!=null){
-            return $this->getAuthorById($id)->delete();
+    /**
+     * Delete record if it exists
+     * 
+     * @param int $id
+     * @return bool
+     */
+    public function delete(int $id): bool
+    {
+        if ($id != null){
+            return $this->getById($id)->delete();
         }
         return false;
     }
-    
-    public function newAuthor(array $fullmaster): Author{
-        return Author:: query()->create($fullmaster);
+    /**
+     * Create new record
+     * 
+     * @param array $author
+     * @return Author
+     */
+    public function new(AuthorDataTransferObject $author): Author
+    {
+        return Author:: query()->create([
+            'name'=>$author->getName(),
+            'surname'=>$author->getSurame(),
+            'middle_name'=>$author->getMiddleName()
+        ]);
     }
 }

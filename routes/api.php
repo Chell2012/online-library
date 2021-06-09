@@ -69,6 +69,7 @@ Route::middleware('auth:api')->group(function (){
     Route::get('/tags', [TagController::class, 'index']);
     Route::post('/tags', [TagController::class, 'store']);
     Route::get('/tags/{tag:title}', [TagController::class, 'show']);
+    Route::get('/tags/{tag:id}', [TagController::class, 'show']);
     Route::patch('/tags/{tag:title}', [TagController::class, 'update']);
     Route::put('/tags/{tag:title}', [TagController::class, 'update']);
     Route::patch('/tags/{tag:id}', [TagController::class, 'update']);

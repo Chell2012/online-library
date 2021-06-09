@@ -15,5 +15,4 @@ class Tag extends Model
     use HasFactory;
     
     protected $fillable = ['title', 'category_id'];
-    
 }
