@@ -41,10 +41,10 @@ class TagRepository implements TagRepositoryInterface
     /**
      * Delete record if it exists
      * 
-     * @param type $id
+     * @param int $id
      * @return bool
      */
-    public function delete($id): bool
+    public function delete(int $id): bool
     {
         if ($id!=null){
             return $this->getById($id)->delete();

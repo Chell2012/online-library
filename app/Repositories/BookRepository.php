@@ -112,9 +112,9 @@ class BookRepository implements BookRepositoryInterface
      */
     public function delete(int $id): bool
     {
+        $removingBook = $this->getById($id);
         if ($this->getById($id)!=null){
-            $rmBook = $this->getById($id)->delete();
-            return $rmBook;
+            return $removingBook->delete();
         }
         return false;
     }

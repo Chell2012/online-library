@@ -26,7 +26,7 @@ class TagsUpdateRequest extends FormRequest
     {
         return [
             'title'=>'string|unique:App\Models\Tag|max:255',
-            'category_id' => 'integer'
+            'category_id' => 'nullable|integer|exists:App\Models\Category,id'
         ];
     }
 }
