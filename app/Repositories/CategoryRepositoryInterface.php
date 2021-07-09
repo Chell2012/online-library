@@ -23,7 +23,7 @@ interface CategoryRepositoryInterface
      * @param mixed|array $columns
      * @return Collection|null
      */
-    public function getAll($columns): ?Collection;
+    public function getAll($columns = ['*']): ?Collection;
     /**
      * Return record if it exists
      * 

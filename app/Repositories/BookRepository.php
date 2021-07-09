@@ -13,6 +13,7 @@ use App\Models\BooksAuthors;
 use App\Models\BooksTags;
 use Illuminate\Database\Eloquent\Collection;
 use App\DTO\BookDataTransferObject;
+use App\DTO\FilterDataTransferObject;
 
 /**
  * Repository of book table
@@ -31,16 +32,103 @@ class BookRepository implements BookRepositoryInterface
     {
         return Book::all($columns);
     }
-    
+    /**
+     * Return collection of books after filter
+     * 
+     * @param FilterDataTransferObject $filter
+     * @return Collection|null
+     */
+    public function getByFilter(FilterDataTransferObject $filter): ?Collection
+    {
+        $books = Book::query();
+        if($filter->getAuthorsIds()!=null){
+            $booksIds = $this->getIdByAuthors($filter->getAuthorsIds());
+        }
+        if($filter->getTagsIds()!=null){
+            $booksIds = $booksIds->intersect($this->getIdByTags($filter->getTagsIds()));
+        }
+        $books = $books->where(function($query) use ($booksIds)
+        {
+            foreach ($booksIds as $bookId){
+                $query = $query->orWhere('id', '=', $bookId->book_id);
+            }
+        });
+        if($filter->getCategoryId()!=null){
+            $books = $books->where('category_id', '=', $filter->getCategoryId());
+        }
+        if($filter->getISBN()!=null){
+            $books = $books->where('isbn', '=', $filter->getISBN());
+        }
+        if($filter->getPublisherId()!=null){
+            $books = $books->where('publisher_id', '=', $filter->getPublisherId());
+        }
+        if($filter->getTitle()!=null){
+            $books = $books->where('title', '=', $filter->getTitle());
+        }
+        if($filter->getYear()!=null){
+            $books = $books->where('year', '=', $filter->getYear());
+        }
+        return $books->get();
+    }
+    /**
+     * Return ids of books which was created by inputed authors
+     * 
+     * @param array $authorsId
+     * @return Collection 
+     */
+    private function getIdByAuthors(array $authorsId): ?Collection
+    {
+        $booksIds = BooksAuthors::query()
+        ->where('author_id', $authorsId[0])
+        ->get('book_id')
+        ->filter(function($book) use ($authorsId){
+            foreach ($authorsId as $authorId) {
+                $bookCheck = BooksAuthors::query()
+                ->where('author_id', $authorId)
+                ->where('book_id', $book->book_id)
+                ->value('book_id');
+                if ($bookCheck==null){
+                    return false;
+                }
+            }
+            return true;
+        })->values();
+        return $booksIds;
+    }
+    /**
+     * Return ids of books which has inputed tags
+     * 
+     * @param array $tagsId
+     * @return Collection 
+     */
+    private function getIdByTags(array $tagsId): ?Collection
+    {
+        $booksIds = BooksTags::query()
+        ->where('tag_id', $tagsId[0])
+        ->get('book_id')
+        ->filter(function($book) use ($tagsId){
+            foreach ($tagsId as $tagId) {
+                $bookCheck = BooksTags::query()
+                ->where('tag_id', $tagId)
+                ->where('book_id', $book->book_id)
+                ->value('book_id');
+                if ($bookCheck==null){
+                    return false;
+                }
+            }
+            return true;
+        })->values();
+        return $booksIds;
+    }
     /**
      * Return record if it exists
      * 
      * @param int $id
      * @return array|null
      */
-    public function getById(int $id): ?Book{
+    public function getById(int $id): ?Book
+    {
         return Book::query()->find($id);
-        
     }
     /**
      * Return book with tags and authors
@@ -113,7 +201,7 @@ class BookRepository implements BookRepositoryInterface
     public function delete(int $id): bool
     {
         $removingBook = $this->getById($id);
-        if ($this->getById($id)!=null){
+        if ($removingBook!=null){
             return $removingBook->delete();
         }
         return false;

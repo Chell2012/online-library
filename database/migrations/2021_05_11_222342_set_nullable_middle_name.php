@@ -26,7 +26,7 @@ class SetNullableMiddleName extends Migration
     public function down()
     {
         Schema::table('authors', function (Blueprint $table) {
-            $table->string('middle_name')->nullable(false)>change();
+            $table->string('middle_name')->nullable(false)->change();
         });
     }
 }

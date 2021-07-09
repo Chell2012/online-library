@@ -9,13 +9,10 @@
 namespace App\Services;
 
 use App\Repositories\BookRepositoryInterface;
-use App\Repositories\AuthorRepositoryInterface;
-use App\Repositories\CategoryRepositoryInterface;
-use App\Repositories\PublisherRepositoryInterface;
-use App\Repositories\TagRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\DTO\BookDataTransferObject;
+use App\DTO\FilterDataTransferObject;
 
 /**
  * Description of BookService
@@ -25,31 +22,15 @@ use App\DTO\BookDataTransferObject;
 class BookService 
 {
     private $bookRepository;
-    private $authorRepository;
-    private $categoryRepository;
-    private $publisherRepository;
-    private $tagRepository;
 
     /**
      * 
      * @param BookRepositoryInterface $bookRepository
-     * @param AuthorRepositoryInterface $authorRepository
-     * @param CategoryRepositoryInterface $categoryRepository
-     * @param PublisherRepositoryInterface $publisherRepository
-     * @param TagRepositoryInterface $tagRepository
      */
     public function __construct(
-        BookRepositoryInterface $bookRepository,
-        AuthorRepositoryInterface $authorRepository,
-        CategoryRepositoryInterface $categoryRepository,
-        PublisherRepositoryInterface $publisherRepository,
-        TagRepositoryInterface $tagRepository
+        BookRepositoryInterface $bookRepository
     ){
         $this->bookRepository = $bookRepository;
-        $this->authorRepository = $authorRepository;
-        $this->categoryRepository = $categoryRepository;
-        $this->publisherRepository = $publisherRepository;
-        $this->tagRepository = $tagRepository;
     }
     /**
      * Return collection of records
@@ -69,6 +50,16 @@ class BookService
     public function getWithRelations(int $id): ?array
     {
         return $this->bookRepository->getWithRelations($id);
+    }
+    /**
+     * Return collection of books after filter
+     * 
+     * @param FilterDataTransferObject $filter
+     * @return Collection|null
+     */
+    public function filter(FilterDataTransferObject $filter): ?Collection
+    {
+        return $this->bookRepository->getByFilter($filter);
     }
     /**
      * Create new book and relations

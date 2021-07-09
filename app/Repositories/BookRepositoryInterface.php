@@ -13,6 +13,7 @@ use App\Models\BooksAuthors;
 use App\Models\BooksTags;
 use App\Models\Book;
 use App\DTO\BookDataTransferObject;
+use App\DTO\FilterDataTransferObject;
 
 /**
  *
@@ -27,6 +28,13 @@ interface BookRepositoryInterface
      * @return Collection|null
      */
     public function getAll($columns = ['*']): ?Collection;
+    /**
+     * Return collection of books after filter
+     * 
+     * @param FilterDataTransferObject $filter
+     * @return Collection|null
+     */
+    public function getByFilter(FilterDataTransferObject $filter): ?Collection;
     /**
      * Return book with tags and authors
      * 

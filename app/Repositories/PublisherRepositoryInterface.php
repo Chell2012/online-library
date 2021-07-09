@@ -22,7 +22,7 @@ interface PublisherRepositoryInterface {
      * @param array|mixed $columns
      * @return Collection|null
      */
-    public function getAll($columns): ?Collection;
+    public function getAll($columns = ['*']): ?Collection;
     /**
      * Return record if it exists
      * 
