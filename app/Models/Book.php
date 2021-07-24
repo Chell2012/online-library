@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -36,18 +37,18 @@ class Book extends Model
     
     /**
      * Relation with tags list
-     * @return HasMany
+     * @return BelongsToMany
      */
-    public function tags(): HasMany
+    public function tags(): BelongsToMany
     {
-        return $this->hasMany(BooksTags::class);
+        return $this->belongsToMany(Tag::class, 'books_tags');
     }
     /**
      * Relation with authors list
-     * @return HasMany
+     * @return BelongsToMany
      */
-    public function authors(): HasMany
+    public function authors(): BelongsToMany
     {
-        return $this->hasMany(BooksAuthors::class);
+        return $this->belongsToMany(Author::class, 'books_authors');
     }   
 }

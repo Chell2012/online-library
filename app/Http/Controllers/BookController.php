@@ -6,6 +6,7 @@ use App\Http\Requests\BookStoreRequest;
 use App\Services\BookService;
 use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
+use App\Http\Requests\ApproveRequest;
 use App\Http\Requests\BookFilterRequest;
 use App\Models\Book;
 
@@ -34,6 +35,7 @@ class BookController extends Controller
             'update' => 'update',
             'destroy' => 'delete',
             'filter' => 'filter',
+            'approve' => 'approve'
         ];
     }    
     /**
@@ -136,5 +138,16 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         return response()->json($this->bookService->delete($book->id));
+    }
+    /**
+     * Approve or deapprove author
+     * 
+     * @param  App\Http\Requests\ApproveRequest  $request
+     * @param  Book $book
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(ApproveRequest $request, Book $book)
+    {
+        return response()->json($this->authorRepository->approve($request->approved, $book->id));
     }
 }

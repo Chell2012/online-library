@@ -24,30 +24,15 @@ class AuthServiceProvider extends ServiceProvider
      * @return void
      */
     public function boot()
-    {
+    {   //register policies and permissions
+        $this->defineAdmin();
+        $this->registerPolicies();
+        
         //Я не помню было ли это тут или нет. IDE думает что тут ошибка, но вроде бы оно тут должно быть, так что не трогаю пока
         if (! $this->app->routesAreCached()) {
             Passport::routes();
         }
-        //register policies and permissions
-        $this->registerPolicies();
-        $this->defineAdmin();
-        //а это я вынесу всё в логику системы распределения прав доступа. пока тут для теста. ну и чтобы тут было 4 вгп
-        Gate::define('create-App\Models\Book', function (User $user){
-            if($user){
-                return true;
-            }
-        });
-        Gate::define('update-App\Models\Book', function (User $user){
-            if($user){
-                return true;
-            }
-        });
-        Gate::define('delete-App\Models\Book', function (User $user){
-            if($user){
-                return true;
-            }
-        });
+        
     }
     /**
      * Grant all privileges for admin
@@ -55,8 +40,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     private function defineAdmin(): ?bool
     {
-        Gate::before(function($user) {
-            //return ($user->hasRole('admin') ? true : null);
+        Gate::before(function(User $user) {
+            return ($user->hasRole('admin') ? true : null);
         });
         return null;
     }

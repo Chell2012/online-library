@@ -14,7 +14,7 @@ class AuthorStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check();
+        return true;
     }
 
     /**
@@ -27,7 +27,9 @@ class AuthorStoreRequest extends FormRequest
         return [
             'name'=>'required|string|max:50',
             'surname'=>'required|string|max:50',
-            'middle_name'=>'string|max:50',
+            'middle_name'=>'string|max:50|nullable',
+            'birth_date'=>'date_format:"Y-m-d"|nullable',
+            'death_date'=>'date_format:"Y-m-d"|nullable'
         ];
     }
 }

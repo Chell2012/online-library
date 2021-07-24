@@ -148,4 +148,15 @@ class BookService
         }
         return $this->bookRepository->getTagRelations($bookId, true);
     }
+    /**
+     * Approve or deapprove published record
+     * 
+     * @param int $approved
+     * @param int $id
+     * @return bool
+     */
+    public function approve(int $approved, int $id): bool
+    {
+        return $this->bookRepository->approve($approved, $id);
+    }
 }

@@ -51,4 +51,12 @@ interface PublisherRepositoryInterface {
      * @return bool
      */
     public function delete(int $id): bool;
+    /**
+     * Approve or deapprove published record
+     * 
+     * @param int $approved
+     * @param int $id
+     * @return bool
+     */
+    public function approve(int $approved, int $id): bool;
 }

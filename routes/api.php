@@ -6,6 +6,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PublisherController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\TagController;
 
 /*
@@ -49,6 +50,10 @@ Route::middleware('guest')->group(function (){
     Route::get('/tags', [TagController::class, 'index']);
     Route::get('/tags/{tag:title}', [TagController::class, 'show']);
     Route::get('/tags/{tag:id}', [TagController::class, 'show']);
+    /*
+     * 
+     */
+    Route::post('/register', RegisterController::class);
 });
 Route::middleware('auth:api')->group(function (){
     /*

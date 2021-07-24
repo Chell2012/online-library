@@ -26,7 +26,7 @@ abstract class ResoucePolicy
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Book  $book
+     * @param  \App\Models\Model $model
      * @return bool
      */
     public function view(?User $user, Model $model)
@@ -42,7 +42,6 @@ abstract class ResoucePolicy
      */
     public function create(User $user)
     {
-       
         return $user->can('create-'.$this->getModelClass());
     }
 
@@ -50,12 +49,11 @@ abstract class ResoucePolicy
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Book  $book
+     * @param  \App\Models\Model $model
      * @return bool
      */
     public function update(User $user, Model $model)
     {
-        var_dump('create-'.$this->getModelClass());
         return $user->can('update-'.$this->getModelClass());
     }
 
@@ -63,11 +61,23 @@ abstract class ResoucePolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Book  $book
+     * @param  \App\Models\Model $model
      * @return bool
      */
     public function delete(User $user, Model $model)
     {
         return $user->can('delete-'.$this->getModelClass());
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\Model $model
+     * @return bool
+     */
+    public function approve(User $user, Model $model)
+    {
+        return $user->can('approve-'.$this->getModelClass());
     }
 }

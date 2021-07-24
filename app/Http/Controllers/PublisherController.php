@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ApproveRequest;
 use App\Models\Publisher;
 use Illuminate\Http\Request;
 use \App\Repositories\PublisherRepositoryInterface;
@@ -42,35 +43,47 @@ class PublisherController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int $id
+     * @param  Publisher $publisher
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function show(Publisher $publisher)
     {
-        return  response()->json($this->publisherRepository->getById($id));
+        return  response()->json($this->publisherRepository->getById($publisher->id));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int $id
+     * @param  Publisher $publisher
      * @return \Illuminate\Http\Response
      */
-    public function update(PublisherUpdateRequest $request, int $id)
+    public function update(PublisherUpdateRequest $request, Publisher $publisher)
     {
-        $publisher = $this->publisherRepository->update($id, $request->title);
+        $publisher = $this->publisherRepository->update($publisher->id, $request->title);
         return  response()->json($publisher);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int $id
+     * @param  Publisher $publisher
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id)
+    public function destroy(Publisher $publisher)
     {
-        return response()->json($this->publisherRepository->delete($id));
+        return response()->json($this->publisherRepository->delete($publisher->id));
+    }
+
+    /**
+     * Approve or deapprove author
+     * 
+     * @param  App\Http\Requests\ApproveRequest  $request
+     * @param  Publisher $model
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(ApproveRequest $request, Publisher $model)
+    {
+        return response()->json($this->authorRepository->approve($request->approved, $model->id));
     }
 }

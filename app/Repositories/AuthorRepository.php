@@ -57,6 +57,12 @@ class AuthorRepository implements AuthorRepositoryInterface
             $record->middle_name = $author->getMiddleName();
         }
         $record->surname = $author->getSurame();
+        if ($author->getMiddleName()!=null){
+            $record->birth_date = $author->getBirthDate();
+        }
+        if ($author->getMiddleName()!=null){
+            $record->death_date = $author->getDeathDate();
+        }
         $record->save();
         return $record;
     }
@@ -84,7 +90,27 @@ class AuthorRepository implements AuthorRepositoryInterface
         return Author:: query()->create([
             'name'=>$author->getName(),
             'surname'=>$author->getSurame(),
-            'middle_name'=>$author->getMiddleName()
+            'middle_name'=>$author->getMiddleName(),
+            'birth_date'=>$author->getBirthDate(),
+            'death_date'=>$author->getDeathDate()
         ]);
+    }
+    /**
+     * Approve or deapprove published record
+     * 
+     * @param int $approved
+     * @param int $id
+     * @return bool
+     */
+    public function approve(int $approved, int $id): bool
+    {
+        if ($id != null){
+            $model = $this->getById($id);
+            if ($model!=null){
+                $model->approved = $approved;
+                return $model->save();
+            }
+        }
+        return false; 
     }
 }

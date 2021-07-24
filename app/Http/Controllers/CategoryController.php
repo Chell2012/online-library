@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ApproveRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Repositories\CategoryRepositoryInterface;
@@ -18,6 +19,7 @@ class CategoryController extends Controller
     public function __construct(CategoryRepositoryInterface $categoryRepository){
         $this->categoryRepository = $categoryRepository;
     }
+    
     /**
      * Display a listing of the resource.
      *
@@ -71,5 +73,17 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         return response()->json($this->categoryRepository->delete($category->id));
+    }
+
+    /**
+     * Approve or deapprove author
+     * 
+     * @param  App\Http\Requests\ApproveRequest  $request
+     * @param  Category $model
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(ApproveRequest $request, Category $model)
+    {
+        return response()->json($this->authorRepository->approve($request->approved, $model->id));
     }
 }

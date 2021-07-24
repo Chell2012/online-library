@@ -14,7 +14,7 @@ class AuthorUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check();
+        return true;
     }
 
     /**
@@ -28,6 +28,8 @@ class AuthorUpdateRequest extends FormRequest
             'name'=>'required|string|max:50',
             'surname'=>'required|string|max:50',
             'middle_name'=>'string|max:50',
+            'birth_date'=>'datetime|nullable',
+            'death_date'=>'datetime|nullable'
         ];
     }
 }

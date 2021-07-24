@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
-class PublisherUpdateRequest extends FormRequest
+class ApproveRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,7 +13,7 @@ class PublisherUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return false;
     }
 
     /**
@@ -25,7 +24,7 @@ class PublisherUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'title'=>'required|string|unique:App\Models\Publisher|max:255',
+            'approved'=>'integer|required'
         ];
     }
 }

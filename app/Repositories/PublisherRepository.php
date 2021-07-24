@@ -75,4 +75,22 @@ class PublisherRepository implements PublisherRepositoryInterface
         $publisher->save();
         return $publisher;
     }
+    /**
+     * Approve or deapprove published record
+     * 
+     * @param int $approved
+     * @param int $id
+     * @return bool
+     */
+    public function approve(int $approved, int $id): bool
+    {
+        if ($id != null){
+            $model = $this->getById($id);
+            if ($model!=null){
+                $model->approved = $approved;
+                return $model->save();
+            }
+        }
+        return false; 
+    }
 }

@@ -8,6 +8,8 @@
 
 namespace App\DTO;
 
+use Illuminate\Support\Carbon;
+
 /**
  * DTO for Authors
  * @author vyacheslav
@@ -15,20 +17,26 @@ namespace App\DTO;
 final class AuthorDataTransferObject
 {
     private string $name;
-    private string $middleName;
+    private ?string $middleName;
     private string $surname;
+    private ?Carbon $birth;
+    private ?Carbon $death;
     
     /**
      * 
      * @param string $name
      * @param string $surname
      * @param string $middleName
+     * @param Carbon $birth
+     * @param Carbon $death
      */
-    public function __construct(string $name, string $surname, string $middleName=null)
+    public function __construct(string $name, string $surname, string $middleName=null, Carbon $birth=null, Carbon $death=null)
     {
         $this->name = $name;
         $this->middleName = $middleName;
         $this->surname = $surname;
+        $this->birth = $birth;
+        $this->death = $death;
     }
     /**
      * 
@@ -42,7 +50,7 @@ final class AuthorDataTransferObject
      * 
      * @return string
      */
-    public function getMiddleName(): string
+    public function getMiddleName(): ?string
     {
         return $this->middleName;
     }
@@ -53,5 +61,23 @@ final class AuthorDataTransferObject
     public function getSurame(): string
     {
         return $this->surname;
+    }
+
+    /**
+     * 
+     * @return Carbon
+     */
+    public function getBirthDate(): ?Carbon
+    {
+        return $this->birth;
+    }
+
+    /**
+     * 
+     * @return Carbon
+     */
+    public function getDeathDate(): ?Carbon
+    {
+        return $this->death;
     }
 }

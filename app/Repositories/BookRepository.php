@@ -14,6 +14,10 @@ use App\Models\BooksTags;
 use Illuminate\Database\Eloquent\Collection;
 use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Repository of book table
@@ -40,85 +44,37 @@ class BookRepository implements BookRepositoryInterface
      */
     public function getByFilter(FilterDataTransferObject $filter): ?Collection
     {
-        $books = Book::query();
+        $query = Book::query();
         if($filter->getAuthorsIds()!=null){
-            $booksIds = $this->getIdByAuthors($filter->getAuthorsIds());
+            foreach($filter->getAuthorsIds() as $authorId){
+                $query->whereHas('authors',function(Builder $authorQuery) use ($authorId){
+                    return $authorQuery->where('author_id', $authorId);
+                });
+            }
         }
         if($filter->getTagsIds()!=null){
-            $booksIds = $booksIds->intersect($this->getIdByTags($filter->getTagsIds()));
-        }
-        $books = $books->where(function($query) use ($booksIds)
-        {
-            foreach ($booksIds as $bookId){
-                $query = $query->orWhere('id', '=', $bookId->book_id);
+            foreach($filter->getTagsIds() as $tagId){
+                $query->whereHas('tags',function(Builder $tagQuery) use ($tagId){
+                    return $tagQuery->where('tag_id', $tagId);
+                });
             }
-        });
+        }
         if($filter->getCategoryId()!=null){
-            $books = $books->where('category_id', '=', $filter->getCategoryId());
+            $query->where('category_id', '=', $filter->getCategoryId());
         }
         if($filter->getISBN()!=null){
-            $books = $books->where('isbn', '=', $filter->getISBN());
+            $query->where('isbn', '=', $filter->getISBN());
         }
         if($filter->getPublisherId()!=null){
-            $books = $books->where('publisher_id', '=', $filter->getPublisherId());
+            $query->where('publisher_id', '=', $filter->getPublisherId());
         }
         if($filter->getTitle()!=null){
-            $books = $books->where('title', '=', $filter->getTitle());
+            $query->where('title', '=', $filter->getTitle());
         }
         if($filter->getYear()!=null){
-            $books = $books->where('year', '=', $filter->getYear());
+            $query->where('year', '=', $filter->getYear());
         }
-        return $books->get();
-    }
-    /**
-     * Return ids of books which was created by inputed authors
-     * 
-     * @param array $authorsId
-     * @return Collection 
-     */
-    private function getIdByAuthors(array $authorsId): ?Collection
-    {
-        $booksIds = BooksAuthors::query()
-        ->where('author_id', $authorsId[0])
-        ->get('book_id')
-        ->filter(function($book) use ($authorsId){
-            foreach ($authorsId as $authorId) {
-                $bookCheck = BooksAuthors::query()
-                ->where('author_id', $authorId)
-                ->where('book_id', $book->book_id)
-                ->value('book_id');
-                if ($bookCheck==null){
-                    return false;
-                }
-            }
-            return true;
-        })->values();
-        return $booksIds;
-    }
-    /**
-     * Return ids of books which has inputed tags
-     * 
-     * @param array $tagsId
-     * @return Collection 
-     */
-    private function getIdByTags(array $tagsId): ?Collection
-    {
-        $booksIds = BooksTags::query()
-        ->where('tag_id', $tagsId[0])
-        ->get('book_id')
-        ->filter(function($book) use ($tagsId){
-            foreach ($tagsId as $tagId) {
-                $bookCheck = BooksTags::query()
-                ->where('tag_id', $tagId)
-                ->where('book_id', $book->book_id)
-                ->value('book_id');
-                if ($bookCheck==null){
-                    return false;
-                }
-            }
-            return true;
-        })->values();
-        return $booksIds;
+        return $query->with('tags')->with('authors')->get();
     }
     /**
      * Return record if it exists
@@ -166,6 +122,24 @@ class BookRepository implements BookRepositoryInterface
             'link'=>$BookDTO->getLink(),
             'description'=>$BookDTO->getDescription()
         ]);
+    }
+    /**
+     * Approve or deapprove published record
+     * 
+     * @param int $approved
+     * @param int $id
+     * @return bool
+     */
+    public function approve(int $approved, int $id): bool
+    {
+        if ($id != null){
+            $model = $this->getById($id);
+            if ($model!=null){
+                $model->approved = $approved;
+                return $model->save();
+            }
+        }
+        return false; 
     }
     /**
      * Update record if it exists

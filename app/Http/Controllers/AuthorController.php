@@ -7,6 +7,7 @@ use App\Http\Requests\AuthorStoreRequest;
 use App\Http\Requests\AuthorUpdateRequest;
 use App\Repositories\AuthorRepositoryInterface;
 use App\DTO\AuthorDataTransferObject;
+use App\Http\Requests\ApproveRequest;
 
 class AuthorController extends Controller
 {
@@ -19,7 +20,6 @@ class AuthorController extends Controller
         $this->authorRepository = $authorRepository;
     }
     
-    
     /**
      * Display a listing of the resource.
      *
@@ -27,7 +27,7 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        $authorList = $this->authorRepository->getAll(['id', 'name', 'middle_name', 'surname']);
+        $authorList = $this->authorRepository->getAll();
         return response()->json($authorList);
     }
 
@@ -40,51 +40,66 @@ class AuthorController extends Controller
      */
     public function store(AuthorStoreRequest $request)
     {
-        $author = new AuthorDataTransferObject(
+        $authorDTO = new AuthorDataTransferObject(
             $request->name,
             $request->surname,
-            $request->middle_name
+            $request->middle_name,
+            $request->birth_date,
+            $request->death_date
         );
-        return  response()->json($this->authorRepository->new($author));
+        return  response()->json($this->authorRepository->new($authorDTO));
+    }
+
+    /**
+     * Approve or deapprove author
+     * 
+     * @param  App\Http\Requests\ApproveRequest  $request
+     * @param  Author $author
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(ApproveRequest $request, Author $author)
+    {
+        return response()->json($this->authorRepository->approve($request->approved, $author->id));
     }
 
     /**
      * Display the specified resource.
      *
-     * 
-     * @param int $id
+     * @param Author $author
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id)
+    public function show(Author $author)
     {
-        return response()->json($this->authorRepository->getById($id));
+        return response()->json($this->authorRepository->getById($author->id));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  App\Http\Requests\AuthorUpdateRequest  $request
-     * @param  int $id
+     * @param  Author $author
      * @return \Illuminate\Http\Response
      */
-    public function update(AuthorUpdateRequest $request, int $id)
+    public function update(AuthorUpdateRequest $request, Author $author)
     {
-        $author = new AuthorDataTransferObject(
+        $authorDTO = new AuthorDataTransferObject(
             $request->name,
             $request->surname,
-            $request->middle_name
+            $request->middle_name,
+            $request->birth_date,
+            $request->death_date
         );
-        return response()->json($this->authorRepository->update($id, $author));
+        return response()->json($this->authorRepository->update($author->id, $authorDTO));
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int $id
+     * @param  Author $author
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id)
+    public function destroy(Author $author)
     {
-        return response()->json($this->authorRepository->delete($id));
+        return response()->json($this->authorRepository->delete($author->id));
     }
 }

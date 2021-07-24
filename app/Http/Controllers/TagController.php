@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ApproveRequest;
 use App\Models\Tag;
 use App\Http\Requests\TagsStoreRequest;
 use App\Http\Requests\TagsUpdateRequest;
@@ -66,5 +67,16 @@ class TagController extends Controller
     public function destroy(Tag $tag)
     {
         return response()->json($this->tagRepository->delete($tag->id));
+    }
+    /**
+     * Approve or deapprove author
+     * 
+     * @param  App\Http\Requests\ApproveRequest  $request
+     * @param  Tag $model
+     * @return \Illuminate\Http\Response
+     */
+    public function approve(ApproveRequest $request, Tag $model)
+    {
+        return response()->json($this->authorRepository->approve($request->approved, $model->id));
     }
 }
