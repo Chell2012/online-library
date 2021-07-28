@@ -18,7 +18,10 @@ class Author extends Model
     protected $fillable = [
         'name',
         'middle_name',
-        'surname'
+        'surname',
+        'birth_date',
+        'death_date'
         ];
     
+    protected $dates = ['birth_date','death_date'];
 }

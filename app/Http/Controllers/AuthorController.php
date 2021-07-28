@@ -8,6 +8,7 @@ use App\Http\Requests\AuthorUpdateRequest;
 use App\Repositories\AuthorRepositoryInterface;
 use App\DTO\AuthorDataTransferObject;
 use App\Http\Requests\ApproveRequest;
+use Carbon\Carbon;
 
 class AuthorController extends Controller
 {
@@ -27,8 +28,9 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        $authorList = $this->authorRepository->getAll();
-        return response()->json($authorList);
+        // $authorList = $this->authorRepository->getAll();
+        // return response()->json($authorList);
+        
     }
 
     /**
@@ -40,12 +42,14 @@ class AuthorController extends Controller
      */
     public function store(AuthorStoreRequest $request)
     {
+        $birth_date = new Carbon($request->birth_date);
+        $death_date = new Carbon($request->death_date);
         $authorDTO = new AuthorDataTransferObject(
             $request->name,
             $request->surname,
             $request->middle_name,
-            $request->birth_date,
-            $request->death_date
+            $birth_date,
+            $death_date
         );
         return  response()->json($this->authorRepository->new($authorDTO));
     }

@@ -8,7 +8,7 @@
 
 namespace App\DTO;
 
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 /**
  * DTO for Authors
@@ -65,7 +65,7 @@ final class AuthorDataTransferObject
 
     /**
      * 
-     * @return Carbon
+     * @return null|Carbon
      */
     public function getBirthDate(): ?Carbon
     {
@@ -74,7 +74,7 @@ final class AuthorDataTransferObject
 
     /**
      * 
-     * @return Carbon
+     * @return null|Carbon
      */
     public function getDeathDate(): ?Carbon
     {

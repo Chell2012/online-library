@@ -31,7 +31,10 @@ abstract class ResoucePolicy
      */
     public function view(?User $user, Model $model)
     {
-        return true;
+        if (($model->approved = 1) or ($user->can('view-any'.$this->getModelClass())) or ($user->id == $model->user_id)){
+            return true;
+        }
+        return false;
     }
     
     /**

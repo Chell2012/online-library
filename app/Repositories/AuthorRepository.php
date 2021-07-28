@@ -11,6 +11,7 @@ namespace App\Repositories;
 use App\Models\Author;
 use Illuminate\Database\Eloquent\Collection;
 use App\DTO\AuthorDataTransferObject;
+use Carbon\Carbon;
 
 /**
  * Repository for Author table
@@ -30,6 +31,16 @@ class AuthorRepository implements AuthorRepositoryInterface
         return Author::all($columns);
     }
     /**
+     * Return collection of records
+     * 
+     * @param array $columns
+     * @return Collection|null
+     */
+    public function getAllApproved(array $columns = ['*']): ?Collection
+    {
+        return Author::all($columns)->where('approved', 1);
+    }
+    /**
      * Return record if it exists
      * 
      * @param int $id
@@ -38,6 +49,21 @@ class AuthorRepository implements AuthorRepositoryInterface
     public function getById(int $id): ?Author
     {
         return Author::query()->find($id);
+    }
+    /**
+     * Return record if it exists
+     * 
+     * @param int $id
+     * @return Author|null
+     */
+    public function getApprovedById(int $id): ?Author
+    {
+        if ($record = Author::query()->find($id)){
+            if ($record->approved == 1){
+                return $record;
+            }
+        }
+        return null;
     }
     /**
      * Return upadted record if it exists
@@ -57,6 +83,7 @@ class AuthorRepository implements AuthorRepositoryInterface
             $record->middle_name = $author->getMiddleName();
         }
         $record->surname = $author->getSurame();
+        
         if ($author->getMiddleName()!=null){
             $record->birth_date = $author->getBirthDate();
         }
@@ -87,6 +114,8 @@ class AuthorRepository implements AuthorRepositoryInterface
      */
     public function new(AuthorDataTransferObject $author): Author
     {
+        var_dump($author->getBirthDate());
+        var_dump($author->getDeathDate());
         return Author:: query()->create([
             'name'=>$author->getName(),
             'surname'=>$author->getSurame(),
