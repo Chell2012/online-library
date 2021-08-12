@@ -25,6 +25,13 @@ interface TagRepositoryInterface
      */
     public function getAll($columns = ['*']): ?Collection;
     /**
+     * Return collection of approved records
+     * 
+     * @param array $columns
+     * @return Collection|null
+     */
+    public function getAllApproved(array $columns = ['*']): ?Collection;
+    /**
      * Return record if it exists
      * 
      * @param int $id

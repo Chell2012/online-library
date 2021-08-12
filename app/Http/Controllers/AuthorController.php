@@ -22,15 +22,23 @@ class AuthorController extends Controller
     }
     
     /**
-     * Display a listing of the resource.
+     * Display a listing of approved resources.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        // $authorList = $this->authorRepository->getAll();
-        // return response()->json($authorList);
-        
+        return response()->json($this->authorRepository->getAllApproved());
+    }
+    
+    /**
+     * Display a listing of all resources.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewNotApproved()
+    {
+        return response()->json($this->authorRepository->getAll());
     }
 
     /**

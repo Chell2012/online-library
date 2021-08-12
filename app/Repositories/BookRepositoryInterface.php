@@ -29,6 +29,13 @@ interface BookRepositoryInterface
      */
     public function getAll($columns = ['*']): ?Collection;
     /**
+     * Return collection of records
+     * 
+     * @param array|mixed $columns
+     * @return Collection|null
+     */
+    public function getAllApproved($columns = ['*']): ?Collection;
+    /**
      * Return collection of books after filter
      * 
      * @param FilterDataTransferObject $filter

@@ -18,6 +18,17 @@ class TagController extends Controller
     public function __construct(TagRepositoryInterface $tagRepository){
         $this->tagRepository = $tagRepository;
     }
+
+    /**
+     * Display a listing of all resources.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewNotApproved()
+    {
+        return response()->json($this->authorRepository->getAll());
+    }
+    
     /**
      * Display a listing of the resource.
      *

@@ -29,6 +29,16 @@ class TagRepository implements TagRepositoryInterface
         return Tag::all($columns);
     }
     /**
+     * Return collection of approved records
+     * 
+     * @param array $columns
+     * @return Collection|null
+     */
+    public function getAllApproved(array $columns = ['*']): ?Collection
+    {
+        return Tag::all($columns)->where('approved', '>', '0');
+    }
+    /**
      * Return record if it exists
      * 
      * @param int $id

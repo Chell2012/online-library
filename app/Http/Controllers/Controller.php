@@ -19,7 +19,8 @@ class Controller extends BaseController
     protected function resourceAbilityMap()
     {
         return [
-            'index' => 'viewAny',
+            'index' => 'viewOnlyApproved',
+            'viewNotApproved' => 'viewAny',
             'show' => 'view',
             'create' => 'create',
             'store' => 'create',
@@ -36,6 +37,6 @@ class Controller extends BaseController
      */
     protected function resourceMethodsWithoutModels()
     {
-        return ['index', 'create', 'store'];
+        return ['viewOnlyApproved', 'index', 'create', 'store'];
     }
 }

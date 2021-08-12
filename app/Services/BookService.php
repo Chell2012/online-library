@@ -35,11 +35,12 @@ class BookService
     /**
      * Return collection of records
      * 
+     * @param bool $showOnlyApproved
      * @return Collection|null  
      */
-    public function list(): ?Collection
+    public function list(bool $showOnlyApproved = false): ?Collection
     {
-        return $this->bookRepository->getAll();
+        return $showOnlyApproved ? $this->bookRepository->getAllApproved() : $this->bookRepository->getAll();
     }
     /**
      * Return book with tags and authors

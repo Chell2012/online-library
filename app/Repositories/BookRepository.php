@@ -25,7 +25,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @author vyacheslav
  */
 class BookRepository implements BookRepositoryInterface
-{
+{   
+    /**
+     * Return collection of records
+     * 
+     * @param array|mixed $columns
+     * @return Collection|null
+     */
+    public function getAllApproved($columns = ['*']): ?Collection
+    {
+        return Book::all($columns)->where('approved', '>', '0');;
+    }
     /**
      * Return collection of records
      * 

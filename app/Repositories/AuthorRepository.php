@@ -31,14 +31,14 @@ class AuthorRepository implements AuthorRepositoryInterface
         return Author::all($columns);
     }
     /**
-     * Return collection of records
+     * Return collection of approved records
      * 
      * @param array $columns
      * @return Collection|null
      */
     public function getAllApproved(array $columns = ['*']): ?Collection
     {
-        return Author::all($columns)->where('approved', 1);
+        return Author::all($columns)->where('approved', '>', '0');
     }
     /**
      * Return record if it exists

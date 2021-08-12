@@ -18,6 +18,18 @@ class BookPolicy
     {
         return Book::class;
     }
+
+    /**
+     * Determine whether the user can view any models.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function viewOnlyApproved(?User $user)
+    {
+        return true;
+    }
+
     /**
      * Determine whether the user can view any models.
      *
@@ -26,7 +38,7 @@ class BookPolicy
      */
     public function viewAny(?User $user)
     {
-        return true;
+        return ($user->can('view-not-approved-'.$this->getModelClass()));
     }
 
     /**
@@ -41,11 +53,9 @@ class BookPolicy
         if ($user->can('view-not-approved-'.$this->getModelClass())){
             return true;
         }
-        if ($book->approved == 0){
-            if ($user != null){
-                if ($user->id == $book->user_id){
-                    return true;
-                }
+        if ($book->approved <= 0){
+            if (($user != null)&&($user->id == $book->user_id)){
+                return true;
             }
             return false;
         }
@@ -72,19 +82,10 @@ class BookPolicy
      */
     public function update(User $user, Book $book)
     {
-        if ($user->can('update-any-'.$this->getModelClass()))
-        {
+        if (($user->can('update-'.$this->getModelClass()))||(($book->approved <= 0)&&($user->id == $book->user_id))){
             return true;
         }
-        if ($book->approved == 0){
-            if ($user != null){
-                if ($user->id == $book->user_id){
-                    return $user->can('update-'.$this->getModelClass());
-                }
-            }
-            return false;
-        }
-        return $user->can('update-'.$this->getModelClass());
+        return false;
     }
 
     /**
@@ -96,12 +97,10 @@ class BookPolicy
      */
     public function delete(User $user, Book $book)
     {
-        if ($user->can('delete-any-'.$this->getModelClass())){
+        if (($user->can('delete-'.$this->getModelClass()))||(($book->approved <= 0)&&($user->id == $book->user_id))){
             return true;
         }
-        if ($user->id == $book->user_id){
-            return $user->can('delete-'.$this->getModelClass());
-        }
+        return false;
     }
 
     /**

@@ -21,6 +21,16 @@ class CategoryController extends Controller
     }
     
     /**
+     * Display a listing of all resources.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewNotApproved()
+    {
+        return response()->json($this->authorRepository->getAll());
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response

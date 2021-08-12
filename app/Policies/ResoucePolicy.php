@@ -11,6 +11,18 @@ abstract class ResoucePolicy
     use HandlesAuthorization;
 
     abstract protected function getModelClass(): string;
+
+    /**
+     * Determine whether the user can view any models.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function viewOnlyApproved(?User $user)
+    {
+        return true;
+    }
+
     /**
      * Determine whether the user can view any models.
      *
@@ -19,7 +31,7 @@ abstract class ResoucePolicy
      */
     public function viewAny(?User $user)
     {
-        return true;
+        return $user->can('view-not-approved-'.$this->getModelClass());
     }
 
     /**
@@ -31,7 +43,7 @@ abstract class ResoucePolicy
      */
     public function view(?User $user, Model $model)
     {
-        if (($model->approved = 1) or ($user->can('view-any'.$this->getModelClass())) or ($user->id == $model->user_id)){
+        if ((($model->approved > 0) && ($model->approved != 0)) || ($user->can('view-not-approved'.$this->getModelClass()))){
             return true;
         }
         return false;

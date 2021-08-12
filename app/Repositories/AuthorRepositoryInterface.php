@@ -20,12 +20,19 @@ use App\DTO\AuthorDataTransferObject;
 interface AuthorRepositoryInterface
 {
     /**
-     * Return collection of records
+     * Return collection of approved records
      * 
      * @param array $columns
      * @return Collection|null
      */
-    public function getAll(array $columns = ['*']): ?Collection;
+    public function getAllApproved(array $columns = ['*']): ?Collection;
+    /**
+    * Return collection of records
+    * 
+    * @param array $columns
+    * @return Collection|null
+    */
+   public function getAll(array $columns = ['*']): ?Collection;
     /**
      * Return upadted record if it exists
      * 

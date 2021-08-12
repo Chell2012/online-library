@@ -27,7 +27,8 @@ class BookController extends Controller
     protected function resourceAbilityMap()
     {
         return [
-            'index' => 'viewAny',
+            'index' => 'viewOnlyApproved',
+            'viewNotApproved' => 'viewAny',
             'show' => 'view',
             'create' => 'create',
             'store' => 'create',
@@ -45,7 +46,16 @@ class BookController extends Controller
      */
     protected function resourceMethodsWithoutModels()
     {
-        return ['index', 'create', 'store', 'filter'];
+        return ['viewOnlyApproved', 'index', 'create', 'store', 'filter'];
+    }
+    /**
+     * Display a listing of all resources.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewNotApproved()
+    {
+        return response()->json($this->bookService->list());
     }
     /**
      * Display a listing of the resource.
@@ -54,7 +64,7 @@ class BookController extends Controller
      */
     public function index()
     {
-        return response()->json($this->bookService->list());
+        return response()->json($this->bookService->list(true));
     }
     /**
      * Store a newly created resource in storage.

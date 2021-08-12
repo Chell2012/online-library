@@ -4,90 +4,95 @@ return [
     'librarian' => [
         'App\\Models\\Author' => [
             'view',
-            'view-any',
+            'view-not-approved',
             'create',
             'update',
             'delete',
-            'approve',
-            'view-not-approved',
-            'update-any',
-            'delete-any'
+            'approve'
         ],
         'App\\Models\\Book' => [
             'view',
-            'view-any',
+            'view-not-approved',
             'create',
             'update',
             'delete',
             'approve',
             'filter',
-            'view-not-approved',
-            'update-any',
-            'delete-any'
         ],
         'App\\Models\\Cathegory' => [
             'view',
-            'view-any',
+            'view-not-approved',
             'create',
             'update',
             'delete',
-            'approve',
-            'view-not-approved',
-            'update-any',
-            'delete-any'
+            'approve'
         ],
         'App\\Models\\Publisher' => [
             'view',
-            'view-any',
+            'view-not-approved',
             'create',
             'update',
             'delete',
-            'approve',
-            'view-not-approved',
-            'update-any',
-            'delete-any'
+            'approve'
         ],
         'App\\Models\\Tag' => [
             'view',
-            'view-any',
+            'view-not-approved',
             'create',
             'update',
             'delete',
-            'approve',
-            'view-not-approved',
-            'update-any',
-            'delete-any'
+            'approve'
         ],
+        'App\\Models\\User' => [
+            'view',
+            'update',
+            'delete',
+            'ban',
+            'unban'
+        ]
     ],
     'reader' => [
         'App\\Models\\Author' => [
             'view',
-            'view-any',
             'create',
         ],
         'App\\Models\\Book' => [
             'view',
-            'view-any',
             'create',
-            'update',
-            'delete',
-            'approve',
             'filter'
         ],
         'App\\Models\\Publisher' => [
             'view',
-            'view-any',
             'create',
         ],
         'App\\Models\\Cathegory' => [
             'view',
-            'view-any',
             'create',
         ],
         'App\\Models\\Tag' => [
             'view',
-            'view-any',
             'create',
         ],
-    ]
+        'App\\Models\\User' => [
+            'view',
+        ]
+    ],
+    'banned' => [
+        'App\\Models\\Author' => [
+            'view',
+        ],
+        'App\\Models\\Book' => [
+            'view',
+            'filter'
+        ],
+        'App\\Models\\Publisher' => [
+            'view',
+        ],
+        'App\\Models\\Cathegory' => [
+            'view',
+        ],
+        'App\\Models\\Tag' => [
+            'view',
+        ],
+    ],
 ];

@@ -19,6 +19,17 @@ class PublisherController extends Controller
     public function __construct(PublisherRepositoryInterface $publisherRepository){
         $this->publisherRepository = $publisherRepository;
     }
+
+    /**
+     * Display a listing of all resources.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewNotApproved()
+    {
+        return response()->json($this->authorRepository->getAll());
+    }
+    
     /**
      * Display a listing of the resource.
      *
