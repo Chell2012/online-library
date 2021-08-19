@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
@@ -20,9 +21,9 @@ class RegisterController extends Controller
             ['password' => bcrypt($request->password)],
         ));
         $user->assignRole('reader');
-
+        event(new Registered($user));
         return response()->json([
-            'message' => 'You were successfully registered. Use your email and password to sign in.'
+            'message' => 'You were successfully registered. Please verify your email'
         ], 200);
     }
 }

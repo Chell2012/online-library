@@ -9,6 +9,8 @@ use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\VerifyEmailController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +25,13 @@ use App\Http\Controllers\TagController;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user(); 
 });
+Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+Route::post('/email/verify/resend', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 Route::middleware('guest')->group(function (){
     /*
      * Route for books
@@ -56,7 +65,7 @@ Route::middleware('guest')->group(function (){
      */
     Route::post('/register', RegisterController::class);
 });
-Route::middleware('auth:api')->group(function (){
+Route::middleware('auth:api','verified')->group(function (){
     /*
      * Route for books
      */
