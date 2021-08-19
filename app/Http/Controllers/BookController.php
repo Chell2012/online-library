@@ -30,7 +30,6 @@ class BookController extends Controller
             'index' => 'viewOnlyApproved',
             'viewNotApproved' => 'viewAny',
             'show' => 'view',
-            'create' => 'create',
             'store' => 'create',
             'edit' => 'update',
             'update' => 'update',
@@ -46,7 +45,7 @@ class BookController extends Controller
      */
     protected function resourceMethodsWithoutModels()
     {
-        return ['viewOnlyApproved', 'index', 'create', 'store', 'filter'];
+        return ['viewOnlyApproved', 'index', 'store', 'filter', 'approve'];
     }
     /**
      * Display a listing of all resources.
@@ -156,8 +155,8 @@ class BookController extends Controller
      * @param  Book $book
      * @return \Illuminate\Http\Response
      */
-    public function approve(ApproveRequest $request, Book $book)
+    public function approve(ApproveRequest $request)
     {
-        return response()->json($this->authorRepository->approve($request->approved, $book->id));
+        return response()->json($this->bookService->approve($request->approved, $request->id));
     }
 }

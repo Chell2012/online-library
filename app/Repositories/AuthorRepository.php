@@ -114,8 +114,6 @@ class AuthorRepository implements AuthorRepositoryInterface
      */
     public function new(AuthorDataTransferObject $author): Author
     {
-        var_dump($author->getBirthDate());
-        var_dump($author->getDeathDate());
         return Author:: query()->create([
             'name'=>$author->getName(),
             'surname'=>$author->getSurame(),

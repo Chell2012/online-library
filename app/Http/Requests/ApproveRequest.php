@@ -13,7 +13,7 @@ class ApproveRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,8 @@ class ApproveRequest extends FormRequest
     public function rules()
     {
         return [
-            'approved'=>'integer|required'
+            'approved'=>'integer|required',
+            'id'=>'integer|required'
         ];
     }
 }

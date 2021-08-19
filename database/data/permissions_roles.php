@@ -19,7 +19,7 @@ return [
             'approve',
             'filter',
         ],
-        'App\\Models\\Cathegory' => [
+        'App\\Models\\Category' => [
             'view',
             'view-not-approved',
             'create',
@@ -65,7 +65,7 @@ return [
             'view',
             'create',
         ],
-        'App\\Models\\Cathegory' => [
+        'App\\Models\\Category' => [
             'view',
             'create',
         ],
@@ -88,7 +88,7 @@ return [
         'App\\Models\\Publisher' => [
             'view',
         ],
-        'App\\Models\\Cathegory' => [
+        'App\\Models\\Category' => [
             'view',
         ],
         'App\\Models\\Tag' => [

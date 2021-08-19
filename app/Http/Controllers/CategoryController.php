@@ -18,6 +18,7 @@ class CategoryController extends Controller
      */
     public function __construct(CategoryRepositoryInterface $categoryRepository){
         $this->categoryRepository = $categoryRepository;
+        $this->authorizeResource(Category::class);
     }
     
     /**
@@ -27,7 +28,7 @@ class CategoryController extends Controller
      */
     public function viewNotApproved()
     {
-        return response()->json($this->authorRepository->getAll());
+        return response()->json($this->categoryRepository->getAll());
     }
 
     /**
@@ -37,7 +38,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return response()->json($this->categoryRepository->getAll());
+        return response()->json($this->categoryRepository->getAllApproved());
     }
 
     /**
@@ -89,11 +90,10 @@ class CategoryController extends Controller
      * Approve or deapprove author
      * 
      * @param  App\Http\Requests\ApproveRequest  $request
-     * @param  Category $model
      * @return \Illuminate\Http\Response
      */
-    public function approve(ApproveRequest $request, Category $model)
+    public function approve(ApproveRequest $request)
     {
-        return response()->json($this->authorRepository->approve($request->approved, $model->id));
+        return response()->json($this->categoryRepository->approve($request->approved, $request->id));
     }
 }

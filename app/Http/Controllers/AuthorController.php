@@ -19,6 +19,7 @@ class AuthorController extends Controller
      */
     public function __construct(AuthorRepositoryInterface $authorRepository){
         $this->authorRepository = $authorRepository;
+        $this->authorizeResource(Author::class);
     }
     
     /**
@@ -66,12 +67,11 @@ class AuthorController extends Controller
      * Approve or deapprove author
      * 
      * @param  App\Http\Requests\ApproveRequest  $request
-     * @param  Author $author
      * @return \Illuminate\Http\Response
      */
-    public function approve(ApproveRequest $request, Author $author)
+    public function approve(ApproveRequest $request)
     {
-        return response()->json($this->authorRepository->approve($request->approved, $author->id));
+        return response()->json($this->authorRepository->approve($request->approved, $request->id));
     }
 
     /**
@@ -94,12 +94,14 @@ class AuthorController extends Controller
      */
     public function update(AuthorUpdateRequest $request, Author $author)
     {
+        $birth_date = new Carbon($request->birth_date);
+        $death_date = new Carbon($request->death_date);
         $authorDTO = new AuthorDataTransferObject(
             $request->name,
             $request->surname,
             $request->middle_name,
-            $request->birth_date,
-            $request->death_date
+            $birth_date,
+            $death_date
         );
         return response()->json($this->authorRepository->update($author->id, $authorDTO));
     }

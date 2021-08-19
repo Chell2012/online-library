@@ -22,7 +22,6 @@ class Controller extends BaseController
             'index' => 'viewOnlyApproved',
             'viewNotApproved' => 'viewAny',
             'show' => 'view',
-            'create' => 'create',
             'store' => 'create',
             'edit' => 'update',
             'update' => 'update',
@@ -37,6 +36,6 @@ class Controller extends BaseController
      */
     protected function resourceMethodsWithoutModels()
     {
-        return ['viewOnlyApproved', 'index', 'create', 'store'];
+        return ['viewNotApproved', 'index', 'store', 'approve'];
     }
 }

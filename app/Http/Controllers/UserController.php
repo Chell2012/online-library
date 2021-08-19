@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 //TODO: Добавить сюда репу
@@ -44,24 +45,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $user = User::create(array_merge(
-            $request->only('name', 'email'),
-            ['password' => bcrypt($request->password)],
-        ));
-        $user->assignRole('reader');
-
-        return response()->json($user);
+        return response()->json(User::all('id', 'name'));
     }
 
     /**

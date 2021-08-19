@@ -18,6 +18,7 @@ class PublisherController extends Controller
      */
     public function __construct(PublisherRepositoryInterface $publisherRepository){
         $this->publisherRepository = $publisherRepository;
+        $this->authorizeResource(Publisher::class);
     }
 
     /**
@@ -27,7 +28,7 @@ class PublisherController extends Controller
      */
     public function viewNotApproved()
     {
-        return response()->json($this->authorRepository->getAll());
+        return response()->json($this->publisherRepository->getAll());
     }
     
     /**
@@ -37,7 +38,7 @@ class PublisherController extends Controller
      */
     public function index()
     {
-        return response()->json($this->publisherRepository->getAll());
+        return response()->json($this->publisherRepository->getAllApproved());
     }
 
     /**
@@ -90,11 +91,10 @@ class PublisherController extends Controller
      * Approve or deapprove author
      * 
      * @param  App\Http\Requests\ApproveRequest  $request
-     * @param  Publisher $model
      * @return \Illuminate\Http\Response
      */
-    public function approve(ApproveRequest $request, Publisher $model)
+    public function approve(ApproveRequest $request)
     {
-        return response()->json($this->authorRepository->approve($request->approved, $model->id));
+        return response()->json($this->publisherRepository->approve($request->approved, $request->id));
     }
 }

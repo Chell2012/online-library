@@ -17,6 +17,7 @@ class TagController extends Controller
      */
     public function __construct(TagRepositoryInterface $tagRepository){
         $this->tagRepository = $tagRepository;
+        $this->authorizeResource(Tag::class);
     }
 
     /**
@@ -26,7 +27,7 @@ class TagController extends Controller
      */
     public function viewNotApproved()
     {
-        return response()->json($this->authorRepository->getAll());
+        return response()->json($this->tagRepository->getAll());
     }
     
     /**
@@ -36,7 +37,7 @@ class TagController extends Controller
      */
     public function index()
     {
-        return response()->json($this->tagRepository->getAll());
+        return response()->json($this->tagRepository->getAllApproved());
     }
     /**
      * Store a newly created resource in storage.   
@@ -83,11 +84,10 @@ class TagController extends Controller
      * Approve or deapprove author
      * 
      * @param  App\Http\Requests\ApproveRequest  $request
-     * @param  Tag $model
      * @return \Illuminate\Http\Response
      */
-    public function approve(ApproveRequest $request, Tag $model)
+    public function approve(ApproveRequest $request)
     {
-        return response()->json($this->authorRepository->approve($request->approved, $model->id));
+        return response()->json($this->tagRepository->approve($request->approved, $request->id));
     }
 }

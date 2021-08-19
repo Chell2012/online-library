@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 class AuthorUpdateRequest extends FormRequest
 {
@@ -28,8 +27,8 @@ class AuthorUpdateRequest extends FormRequest
             'name'=>'required|string|max:50',
             'surname'=>'required|string|max:50',
             'middle_name'=>'string|max:50',
-            'birth_date'=>'datetime|nullable',
-            'death_date'=>'datetime|nullable'
+            'birth_date'=>'date_format:"Y-m-d"|nullable',
+            'death_date'=>'date_format:"Y-m-d"|nullable'
         ];
     }
 }

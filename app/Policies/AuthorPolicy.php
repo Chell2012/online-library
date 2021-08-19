@@ -6,6 +6,7 @@ use App\Models\Author;
 
 class AuthorPolicy extends ResoucePolicy
 {
+
     /**
      * Return model's name
      * 

@@ -50,15 +50,15 @@ class BookPolicy
      */
     public function view(?User $user, Book $book)
     {
-        if ($user->can('view-not-approved-'.$this->getModelClass())){
-            return true;
-        }
-        if ($book->approved <= 0){
-            if (($user != null)&&($user->id == $book->user_id)){
-                return true;
-            }
-            return false;
-        }
+        // if ($user->can('view-not-approved-'.$this->getModelClass())){
+        //     return true;
+        // }
+        // if ($book->approved <= 0){
+        //     if (($user != null)&&($user->id == $book->user_id)){
+        //         return true;
+        //     }
+        //     return false;
+        // }
         return true;
     }
     
@@ -82,7 +82,10 @@ class BookPolicy
      */
     public function update(User $user, Book $book)
     {
-        if (($user->can('update-'.$this->getModelClass()))||(($book->approved <= 0)&&($user->id == $book->user_id))){
+        if (
+            ($user->can('update-'.$this->getModelClass()))
+            ||(($book->approved <= 0)&&($user->id == $book->user_id))
+        ) {
             return true;
         }
         return false;
@@ -97,7 +100,10 @@ class BookPolicy
      */
     public function delete(User $user, Book $book)
     {
-        if (($user->can('delete-'.$this->getModelClass()))||(($book->approved <= 0)&&($user->id == $book->user_id))){
+        if (
+            ($user->can('delete-'.$this->getModelClass()))
+            ||(($book->approved <= 0)&&($user->id == $book->user_id))
+        ) {
             return true;
         }
         return false;
@@ -110,7 +116,7 @@ class BookPolicy
      * @param  \App\Models\Book $book
      * @return bool
      */
-    public function approve(User $user, Book $book)
+    public function approve(User $user)
     {
         return $user->can('approve-'.$this->getModelClass());
     }
