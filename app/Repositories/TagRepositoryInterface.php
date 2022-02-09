@@ -9,6 +9,7 @@
 namespace App\Repositories;
 
 use App\Models\Tag;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -23,14 +24,14 @@ interface TagRepositoryInterface
      * @param array|mixed $columns
      * @return Collection|null
      */
-    public function getAll($columns = ['*']): ?Collection;
+    public function getAll($columns = ['*']): ?Paginator;
     /**
      * Return collection of approved records
      * 
      * @param array $columns
      * @return Collection|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Collection;
+    public function getAllApproved(array $columns = ['*']): ?Paginator;
     /**
      * Return record if it exists
      * 

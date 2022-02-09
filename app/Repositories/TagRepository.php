@@ -9,6 +9,7 @@
 namespace App\Repositories;
 
 use App\Models\Tag;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -24,9 +25,9 @@ class TagRepository implements TagRepositoryInterface
      * @param array|mixed $columns
      * @return Collection|null
      */
-    public function getAll($columns = ['*']): ?Collection
+    public function getAll($columns = ['*']): ?Paginator
     {
-        return Tag::all($columns);
+        return Tag::paginate(15);
     }
     /**
      * Return collection of approved records
@@ -34,9 +35,9 @@ class TagRepository implements TagRepositoryInterface
      * @param array $columns
      * @return Collection|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Collection
+    public function getAllApproved(array $columns = ['*']): ?Paginator
     {
-        return Tag::all($columns)->where('approved', '>', '0');
+        return Tag::where('approved', '>', '0')->paginate(15);
     }
     /**
      * Return record if it exists

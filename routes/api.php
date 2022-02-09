@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PublisherController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\RestorePasswordController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\VerifyEmailController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -30,8 +31,14 @@ Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke
     ->name('verification.verify');
 Route::post('/email/verify/resend', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
-    return back()->with('message', 'Verification link sent!');
+    return ['message'=> 'Verification link sent!'];
 })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
+Route::post('/forgot-password',[RestorePasswordController::class,'sendToken'])
+    ->middleware('guest')
+    ->name('password.email');
+Route::post('/reset-password',[RestorePasswordController::class,'changePassword'])
+    ->middleware('guest')
+    ->name('password.reset');
 Route::middleware('guest')->group(function (){
     /*
      * Route for books
@@ -64,6 +71,7 @@ Route::middleware('guest')->group(function (){
      * User routes
      */
     Route::post('/register', RegisterController::class);
+    
 });
 Route::middleware('auth:api','verified')->group(function (){
     /*
