@@ -12,7 +12,7 @@ class BookFilterRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -22,7 +22,7 @@ class BookFilterRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             'title'=>'nullable|string|max:100',
@@ -33,7 +33,10 @@ class BookFilterRequest extends FormRequest
             'tag_id'=>'array|nullable',
             'tag_id.*'=>'integer|exists:App\Models\Tag,id',
             'author_id'=>'array|nullable',
-            'author_id.*'=>'integer|exists:App\Models\Author,id'
+            'author_id.*'=>'integer|exists:App\Models\Author,id',
+            'isApproved'=>'bool|nullable',
+            'forApproveOnly'=>'bool|nullable',
+            'sortBy'=>'string|nullable'
         ];
     }
 }

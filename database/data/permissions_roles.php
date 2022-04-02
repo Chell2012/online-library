@@ -79,20 +79,14 @@ return [
     ],
     'banned' => [
         'App\\Models\\Author' => [
-            'view',
         ],
         'App\\Models\\Book' => [
-            'view',
-            'filter'
         ],
         'App\\Models\\Publisher' => [
-            'view',
         ],
         'App\\Models\\Category' => [
-            'view',
         ],
         'App\\Models\\Tag' => [
-            'view',
         ],
     ],
 ];

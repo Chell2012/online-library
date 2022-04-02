@@ -11,7 +11,7 @@ class BookPolicy
     use HandlesAuthorization;
     /**
      * Return model's name
-     * 
+     *
      * @return string
      */
     protected function getModelClass(): string
@@ -61,7 +61,7 @@ class BookPolicy
         // }
         return true;
     }
-    
+
     /**
      * Determine whether the user can create models.
      *
@@ -131,5 +131,5 @@ class BookPolicy
     {
         return true;
     }
-    
+
 }

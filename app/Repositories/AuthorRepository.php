@@ -11,18 +11,18 @@ namespace App\Repositories;
 use App\Models\Author;
 use Illuminate\Database\Eloquent\Collection;
 use App\DTO\AuthorDataTransferObject;
-use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
  * Repository for Author table
  *
  * @author vyacheslav
  */
-class AuthorRepository implements AuthorRepositoryInterface 
+class AuthorRepository implements AuthorRepositoryInterface
 {
     /**
      * Return collection of records
-     * 
+     *
      * @param array $columns
      * @return Collection|null
      */
@@ -32,17 +32,48 @@ class AuthorRepository implements AuthorRepositoryInterface
     }
     /**
      * Return collection of approved records
-     * 
+     *
      * @param array $columns
      * @return Collection|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Collection
+    public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator
     {
-        return Author::all($columns)->where('approved', '>', '0');
+        return Author::where('approved', '>', '0')->paginate($perPage = 15, $columns);
+    }
+
+    /**
+     * Return collection of records based on search
+     *
+     * @param AuthorDataTransferObject|null $search
+     * @param array $columns
+     * @return Collection|null
+     */
+    public function getBySearch( ?AuthorDataTransferObject $search, array $columns = ['*']): ?Collection
+    {
+        $list = Author::where();
+        if ($list === null){
+            return null;
+        }
+        if ($search->getName()!=null){
+            $list = $list->where('name', $search->getName());
+        }
+        if ($search->getMiddleName()!=null){
+            $list = $list->where('middle_name', $search->getMiddleName());
+        }
+        if ($search->getSurame()!=null){
+            $list = $list->where('surname', $search->getSurame());
+        }
+        if ($search->getBirthDate()!=null){
+            $list = $list->where('birth_date', $search->getBirthDate());
+        }
+        if ($search->getDeathDate()!=null){
+            $list = $list->where('death_date', $search->getDeathDate());
+        }
+        return $list;
     }
     /**
      * Return record if it exists
-     * 
+     *
      * @param int $id
      * @return Author|null
      */
@@ -52,7 +83,7 @@ class AuthorRepository implements AuthorRepositoryInterface
     }
     /**
      * Return record if it exists
-     * 
+     *
      * @param int $id
      * @return Author|null
      */
@@ -65,11 +96,12 @@ class AuthorRepository implements AuthorRepositoryInterface
         }
         return null;
     }
+
     /**
      * Return upadted record if it exists
-     * 
+     *
      * @param int $id
-     * @param array $author
+     * @param AuthorDataTransferObject $author
      * @return Author|null
      */
     public function update(int $id, AuthorDataTransferObject $author): ?Author
@@ -83,11 +115,11 @@ class AuthorRepository implements AuthorRepositoryInterface
             $record->middle_name = $author->getMiddleName();
         }
         $record->surname = $author->getSurame();
-        
-        if ($author->getMiddleName()!=null){
+
+        if ($author->getBirthDate()!=null){
             $record->birth_date = $author->getBirthDate();
         }
-        if ($author->getMiddleName()!=null){
+        if ($author->getDeathDate()!=null){
             $record->death_date = $author->getDeathDate();
         }
         $record->save();
@@ -95,7 +127,7 @@ class AuthorRepository implements AuthorRepositoryInterface
     }
     /**
      * Delete record if it exists
-     * 
+     *
      * @param int $id
      * @return bool
      */
@@ -108,7 +140,7 @@ class AuthorRepository implements AuthorRepositoryInterface
     }
     /**
      * Create new record
-     * 
+     *
      * @param array $author
      * @return Author
      */
@@ -124,7 +156,7 @@ class AuthorRepository implements AuthorRepositoryInterface
     }
     /**
      * Approve or deapprove published record
-     * 
+     *
      * @param int $approved
      * @param int $id
      * @return bool
@@ -138,6 +170,6 @@ class AuthorRepository implements AuthorRepositoryInterface
                 return $model->save();
             }
         }
-        return false; 
+        return false;
     }
 }

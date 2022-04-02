@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Role;
 class PermissionsSeeder extends Seeder
 {
     private $data = [];
-    
+
     /**
      * Run the database seeds.
      *
@@ -28,10 +28,10 @@ class PermissionsSeeder extends Seeder
 
     private function seedRoles(): void
     {
-        Role::create(['name' => 'admin', 'guard_name' => 'api']);
+        Role::create(['name' => 'admin', 'guard_name' => 'web']);
 
         foreach ($this->data as $roleName => $perms) {
-            $role = Role::create(['name' => $roleName, 'guard_name' => 'api']);
+            $role = Role::create(['name' => $roleName, 'guard_name' => 'web']);
             $this->seedRolePermissions($role, $perms);
         }
     }
@@ -43,7 +43,7 @@ class PermissionsSeeder extends Seeder
                 ->crossJoin($model)
                 ->map(function ($item) {
                 $perm = implode('-', $item); //view-post
-                Permission::findOrCreate($perm, 'api');
+                Permission::findOrCreate($perm, 'web');
 
                 return $perm;
             })->toArray();

@@ -8,6 +8,7 @@
 
 namespace App\Services;
 
+use App\Models\Book;
 use App\Repositories\BookRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -19,12 +20,12 @@ use App\DTO\FilterDataTransferObject;
  *
  * @author vyacheslav
  */
-class BookService 
+class BookService
 {
     private $bookRepository;
 
     /**
-     * 
+     *
      * @param BookRepositoryInterface $bookRepository
      */
     public function __construct(
@@ -34,9 +35,9 @@ class BookService
     }
     /**
      * Return collection of records
-     * 
+     *
      * @param bool $showOnlyApproved
-     * @return Collection|null  
+     * @return Collection|null
      */
     public function list(bool $showOnlyApproved = false): ?Collection
     {
@@ -44,7 +45,7 @@ class BookService
     }
     /**
      * Return book with tags and authors
-     * 
+     *
      * @param int $id
      * @return array|null
      */
@@ -54,7 +55,7 @@ class BookService
     }
     /**
      * Return collection of books after filter
-     * 
+     *
      * @param FilterDataTransferObject $filter
      * @return Collection|null
      */
@@ -64,27 +65,23 @@ class BookService
     }
     /**
      * Create new book and relations
-     * 
+     *
      * @param BookDataTransferObject $bookDTO
-     * @return array|null
+     * @return Book
      */
-    public function new(BookDataTransferObject $bookDTO): ?array
+    public function new(BookDataTransferObject $bookDTO): ?Book
     {
         $book = $this->bookRepository->new(Auth::id(), $bookDTO);
         if (!isset($book)){
             return null;
         }
-        $authors = $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
-        $tags = $this->setTags($book->id, $bookDTO->getTagsIds());
-        return  [
-        'book'=>$book,
-        'authors'=>$authors,
-        'tags'=>$tags
-        ];
+//        $authors = $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
+//        $tags = $this->setTags($book->id, $bookDTO->getTagsIds());
+        return  $book;
     }
     /**
      * Update book and relations if it exists
-     * 
+     *
      * @param BookDataTransferObject $bookDTO
      * @param int $id
      * @return array|null
@@ -104,7 +101,7 @@ class BookService
         ];
     }
     /**
-     * 
+     *
      * @param int $id
      * @return bool|null
      */
@@ -115,7 +112,7 @@ class BookService
 
     /**
      * Create book-author relations
-     * 
+     *
      * @param int $bookId
      * @param array $authors
      * @return Collection|null
@@ -128,13 +125,13 @@ class BookService
                 $this->bookRepository->setAuthorRelation($bookId, $authorId);
             }
         }
-        
+
         return $this->bookRepository->getAuthorRelations($bookId, true);
     }
-    
+
     /**
      * Create book-tag relations
-     * 
+     *
      * @param int $bookId
      * @param array $tags
      * @return Collection|null
@@ -151,7 +148,7 @@ class BookService
     }
     /**
      * Approve or deapprove published record
-     * 
+     *
      * @param int $approved
      * @param int $id
      * @return bool

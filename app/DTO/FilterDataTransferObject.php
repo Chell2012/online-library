@@ -15,16 +15,19 @@ namespace App\DTO;
  */
 class FilterDataTransferObject
 {
-    private ?string $title;
-    private ?int $publisherId;
-    private ?int $year;
-    private ?string $isbn;
-    private ?int $categoryId;
-    private ?array $authorsIds;
-    private ?array $tagsIds;
-    
+    private $title;
+    private $publisherId;
+    private $year;
+    private $isbn;
+    private $categoryId;
+    private $authorsIds;
+    private $tagsIds;
+    private $isApproved;
+    private $forApproveOnly;
+    private $sortBy;
+
     /**
-     * 
+     *
      * @param string|null $title
      * @param int|null $publisherId
      * @param int|null $year
@@ -32,17 +35,23 @@ class FilterDataTransferObject
      * @param int|null $categoryId
      * @param array|null $authorsIds
      * @param array|null $tagsIds
+     * @param bool|null $isApproved
+     * @param bool|null $forApproveOnly
+     * @param string|null $sortBy
      */
     public function __construct(
-            ?string $title,
-            ?int $publisherId,
-            ?int $year,
-            ?string $isbn,
-            ?int $categoryId,
-            ?array $authorsIds,
-            ?array $tagsIds
-            )
-    {
+
+        ?string $title,
+        ?int $publisherId,
+        ?int $year,
+        ?string $isbn,
+        ?int $categoryId,
+        ?array $authorsIds,
+        ?array $tagsIds,
+        ?bool $isApproved,
+        ?bool $forApproveOnly,
+        ?string $sortBy
+    ){
         $this->title = $title;
         $this->publisherId = $publisherId;
         $this->year = $year;
@@ -50,9 +59,12 @@ class FilterDataTransferObject
         $this->categoryId = $categoryId;
         $this->authorsIds = $authorsIds;
         $this->tagsIds = $tagsIds;
+        $this->isApproved = $isApproved;
+        $this->forApproveOnly = $forApproveOnly;
+        $this->sortBy = $sortBy;
     }
     /**
-     * 
+     *
      * @return int
      */
     public function getPublisherId(): ?int
@@ -60,7 +72,7 @@ class FilterDataTransferObject
         return $this->publisherId;
     }
     /**
-     * 
+     *
      * @return int
      */
     public function getYear(): ?int
@@ -68,7 +80,7 @@ class FilterDataTransferObject
         return $this->year;
     }
     /**
-     * 
+     *
      * @return string
      */
     public function getISBN(): ?string
@@ -76,7 +88,7 @@ class FilterDataTransferObject
         return $this->isbn;
     }
     /**
-     * 
+     *
      * @return int
      */
     public function getCategoryId(): ?int
@@ -84,7 +96,7 @@ class FilterDataTransferObject
         return $this->categoryId;
     }
     /**
-     * 
+     *
      * @return array
      */
     public function getAuthorsIds(): ?array
@@ -92,7 +104,7 @@ class FilterDataTransferObject
         return $this->authorsIds;
     }
     /**
-     * 
+     *
      * @return array
      */
     public function getTagsIds(): ?array
@@ -100,11 +112,35 @@ class FilterDataTransferObject
         return $this->tagsIds;
     }
     /**
-     * 
+     *
      * @return string
      */
     public function getTitle(): ?string
     {
         return $this->title;
+    }
+    /**
+     *
+     * @return string
+     */
+    public function getApproved(): ?bool
+    {
+        return $this->isApproved;
+    }
+    /**
+     *
+     * @return string
+     */
+    public function getforApproveOnly(): ?bool
+    {
+        return $this->forApproveOnly;
+    }
+    /**
+     *
+     * @return string
+     */
+    public function getSortBy(): ?string
+    {
+        return $this->sortBy;
     }
 }

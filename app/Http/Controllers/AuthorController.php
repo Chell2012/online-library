@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AuthorSearchRequest;
 use App\Models\Author;
 use App\Http\Requests\AuthorStoreRequest;
 use App\Http\Requests\AuthorUpdateRequest;
@@ -9,45 +10,81 @@ use App\Repositories\AuthorRepositoryInterface;
 use App\DTO\AuthorDataTransferObject;
 use App\Http\Requests\ApproveRequest;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 
 class AuthorController extends Controller
 {
     private $authorRepository;
+
     /**
-     * 
+     *
      * @param AuthorRepositoryInterface $authorRepository
      */
     public function __construct(AuthorRepositoryInterface $authorRepository){
         $this->authorRepository = $authorRepository;
         $this->authorizeResource(Author::class);
     }
-    
+
     /**
-     * Display a listing of approved resources.
-     *
-     * @return \Illuminate\Http\Response
+     * @param AuthorSearchRequest $request
+     * @return RedirectResponse
      */
-    public function index()
+    public function search(AuthorSearchRequest $request): RedirectResponse
     {
-        return response()->json($this->authorRepository->getAllApproved());
+        return response()->redirectToRoute('author.index',['request' => $request]);
     }
-    
+
     /**
-     * Display a listing of all resources.
+     * Display a listing of resources.
      *
-     * @return \Illuminate\Http\Response
+     * @param AuthorSearchRequest|null $request
+     * @return Response
      */
-    public function viewNotApproved()
+    public function index(?AuthorSearchRequest $request): Response
     {
-        return response()->json($this->authorRepository->getAll());
+        if ($request->isMethod('post')){
+            if ($request->user()->can('view-not-approved-'.Author::class)){
+                $authorDTO = new AuthorDataTransferObject(
+                    $request->name,
+                    $request->surname,
+                    $request->middle_name,
+                    $request->birth_date,
+                    $request->death_date,
+                    $request->approved
+                );
+            }else{
+                $authorDTO = new AuthorDataTransferObject(
+                    $request->name,
+                    $request->surname,
+                    $request->middle_name,
+                    $request->birth_date,
+                    $request->death_date
+                );
+            }
+            $authors = $this->authorRepository->getBySearch($authorDTO);
+        }else{
+            $authors = $this->authorRepository->getAllApproved();
+        }
+        return response()->view('author.list',[
+            'approved_status'=> [
+                -1 => 'declined',
+                0 => 'for_approve',
+                1 => 'approved',
+                2 => 'admin_library'
+            ],
+            'request'=>$request,
+            'authors'=>$authors,
+            'pageTitle' => __('Авторы'),
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * 
+     *
      * @param AuthorStoreRequest $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(AuthorStoreRequest $request)
     {
@@ -65,9 +102,9 @@ class AuthorController extends Controller
 
     /**
      * Approve or deapprove author
-     * 
-     * @param  App\Http\Requests\ApproveRequest  $request
-     * @return \Illuminate\Http\Response
+     *
+     * @param ApproveRequest $request
+     * @return Response
      */
     public function approve(ApproveRequest $request)
     {
@@ -78,7 +115,7 @@ class AuthorController extends Controller
      * Display the specified resource.
      *
      * @param Author $author
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show(Author $author)
     {
@@ -88,9 +125,9 @@ class AuthorController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  App\Http\Requests\AuthorUpdateRequest  $request
-     * @param  Author $author
-     * @return \Illuminate\Http\Response
+     * @param AuthorUpdateRequest $request
+     * @param Author $author
+     * @return Response
      */
     public function update(AuthorUpdateRequest $request, Author $author)
     {
@@ -110,7 +147,7 @@ class AuthorController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  Author $author
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(Author $author)
     {
