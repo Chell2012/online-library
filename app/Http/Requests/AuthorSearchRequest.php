@@ -11,7 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @property string $middle_name
  * @property Carbon $birth_date
  * @property Carbon $death_date
- * @property int $approved
+ * @property array $approved
  */
 class AuthorSearchRequest extends FormRequest
 {
@@ -38,7 +38,8 @@ class AuthorSearchRequest extends FormRequest
             'middle_name'=>'string|max:50|nullable',
             'birth_date'=>'date_format:"Y-m-d"|nullable',
             'death_date'=>'date_format:"Y-m-d"|nullable',
-            'approved'=>'int|nullable',
+            'approved'=>'array|nullable',
+            'approved.*'=>'int|nullable',
         ];
     }
 }

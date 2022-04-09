@@ -34,7 +34,7 @@ class AuthorRepository implements AuthorRepositoryInterface
      * Return collection of approved records
      *
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
     public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator
     {
@@ -46,13 +46,15 @@ class AuthorRepository implements AuthorRepositoryInterface
      *
      * @param AuthorDataTransferObject|null $search
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getBySearch( ?AuthorDataTransferObject $search, array $columns = ['*']): ?Collection
+    public function getBySearch( ?AuthorDataTransferObject $search, array $columns = ['*']): ?LengthAwarePaginator
     {
-        $list = Author::where();
-        if ($list === null){
-            return null;
+
+        if ($search->getApprove()!=null){
+            $list = Author::whereIn('approved', $search->getApprove());
+        } else {
+            $list = Author::where('approved', '>', '0');
         }
         if ($search->getName()!=null){
             $list = $list->where('name', $search->getName());
@@ -69,7 +71,7 @@ class AuthorRepository implements AuthorRepositoryInterface
         if ($search->getDeathDate()!=null){
             $list = $list->where('death_date', $search->getDeathDate());
         }
-        return $list;
+        return $list->paginate($perPage = 15, $columns);
     }
     /**
      * Return record if it exists

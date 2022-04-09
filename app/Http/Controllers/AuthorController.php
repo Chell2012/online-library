@@ -27,53 +27,35 @@ class AuthorController extends Controller
     }
 
     /**
-     * @param AuthorSearchRequest $request
-     * @return RedirectResponse
-     */
-    public function search(AuthorSearchRequest $request): RedirectResponse
-    {
-        return response()->redirectToRoute('author.index',['request' => $request]);
-    }
-
-    /**
      * Display a listing of resources.
      *
      * @param AuthorSearchRequest|null $request
      * @return Response
      */
-    public function index(?AuthorSearchRequest $request): Response
+    public function index(AuthorSearchRequest $request): Response
     {
-        if ($request->isMethod('post')){
-            if ($request->user()->can('view-not-approved-'.Author::class)){
-                $authorDTO = new AuthorDataTransferObject(
-                    $request->name,
-                    $request->surname,
-                    $request->middle_name,
-                    $request->birth_date,
-                    $request->death_date,
-                    $request->approved
-                );
-            }else{
-                $authorDTO = new AuthorDataTransferObject(
-                    $request->name,
-                    $request->surname,
-                    $request->middle_name,
-                    $request->birth_date,
-                    $request->death_date
-                );
-            }
-            $authors = $this->authorRepository->getBySearch($authorDTO);
+        if ($request->user()->can('view-not-approved-'.Author::class)){
+            $authorDTO = new AuthorDataTransferObject(
+                $request->name,
+                $request->surname,
+                $request->middle_name,
+                ($request->birth_date!=null)?Carbon::parse($request->birth_date):null,
+                ($request->death_date!=null)?Carbon::parse($request->death_date):null,
+                ($request->approved!=null)?array_map(function($value) { return (int)$value; }, $request->approved):null
+            );
         }else{
-            $authors = $this->authorRepository->getAllApproved();
+            $authorDTO = new AuthorDataTransferObject(
+                $request->name,
+                $request->surname,
+                $request->middle_name,
+                ($request->birth_date!=null)?Carbon::parse($request->birth_date):null,
+                ($request->death_date!=null)?Carbon::parse($request->death_date):null,
+                [1,2]
+            );
         }
+        $authors = $this->authorRepository->getBySearch($authorDTO);
         return response()->view('author.list',[
-            'approved_status'=> [
-                -1 => 'declined',
-                0 => 'for_approve',
-                1 => 'approved',
-                2 => 'admin_library'
-            ],
-            'request'=>$request,
+            'approved_status'=>require_once database_path("data/status_list.php"),
             'authors'=>$authors,
             'pageTitle' => __('Авторы'),
         ]);

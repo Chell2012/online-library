@@ -7,49 +7,49 @@
         </div>
 
         <div class="card-body">
-            <form id="search-form" action="{{ route('author.search') }}" method="POST">
+            <form id="search-form" action="{{ route('author.index') }}" method="GET">
                 @csrf
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="exampleSelectBorder">Имя</label>
-                            <input type="text" class="form-control form-control-border" id="exampleInputBorder" placeholder="Имя" value={{ old('name') }}>
+                            <label>Имя</label>
+                            <input name="name" type="text" class="form-control form-control-border" placeholder="Имя" value={{ old('name') }}>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="exampleSelectBorder">Отчество</label>
-                            <input type="text" class="form-control form-control-border" id="exampleInputBorder" placeholder="Имя" value={{ old('middle_name') }}>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="exampleSelectBorder">Фамилия</label>
-                            <input type="text" class="form-control form-control-border" id="exampleInputBorder" placeholder="Имя" value={{ old('surname') }}>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="exampleSelectBorder">Дата рождения</label>
-                            <input type="text" class="form-control form-control-border" id="exampleInputBorder" placeholder="Имя" value={{ old('birth_date') }}>
+                            <label>Отчество</label>
+                            <input name="middle_name" type="text" class="form-control form-control-border" placeholder="Отчество" value={{ old('middle_name') }}>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="exampleSelectBorder">Дата смерти</label>
-                            <input type="text" class="form-control form-control-border" id="exampleInputBorder" placeholder="Имя" value={{ old('death_date') }}>
+                            <label>Фамилия</label>
+                            <input name="surname" type="text" class="form-control form-control-border" placeholder="Фамилия" value={{ old('surname') }}>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="exampleSelectBorder">Год издания</label>
-                            <select class="custom-select form-control-border" id="exampleSelectBorder">
+                            <label>Дата рождения</label>
+                            <input name="birth_date" type="date" class="form-control form-control-border" value={{ old('birth_date') }}>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Дата смерти</label>
+                            <input name="death_date" type="date" class="form-control form-control-border" value={{ old('death_date') }}>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Статус</label>
+                            <select id="status" name="approved[]" class="form-control approve-selection" multiple="multiple">
                                 @foreach($approved_status as $status => $status_name)
-                                <option value="{{ $status }}">{{ $status_name }}</option>
+                                    <option value="{{ $status }}">{{ $status_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -60,13 +60,13 @@
             </form>
         </div>
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary" form="search-form">Submit</button>
+            <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Submit</button>
         </div>
     </div>
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Каталог книг</h3>
+                <h3 class="card-title">Авторы</h3>
             </div>
 
             <div class="card-body">
@@ -75,7 +75,7 @@
                     <thead>
                     <tr>
                         <th style="width: 10px">#</th>
-                        <th>Описание</th>
+                        <th>Автор</th>
                         <th style="width: 40px"></th>
                     </tr>
                     </thead>
@@ -117,7 +117,7 @@
 @section('js')
     <script>
         $(document).ready(function() {
-            $('.tags-selection').select2();
+            $('.approve-selection').select2();
         });
     </script>
 @stop

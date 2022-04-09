@@ -25,33 +25,33 @@ final class AuthorDataTransferObject
 
     /**
      *
-     * @param string $name
-     * @param string $surname
+     * @param string|null $name
+     * @param string|null $surname
      * @param string|null $middleName
      * @param Carbon|null $birth
      * @param Carbon|null $death
-     * @param int|null $approved
+     * @param array|null $approved
      */
-    public function __construct(string $name, string $surname, string $middleName=null, Carbon $birth=null, Carbon $death=null, int $approved=null)
+    public function __construct(string $name=null, string $surname=null, string $middleName=null, Carbon $birth=null, Carbon $death=null, array $approved=null)
     {
         $this->name = $name;
         $this->middleName = $middleName;
         $this->surname = $surname;
         $this->birth = $birth;
         $this->death = $death;
-
+        $this->approved = $approved;
     }
     /**
      *
-     * @return string
+     * @return null|string
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
     /**
      *
-     * @return string
+     * @return null|string
      */
     public function getMiddleName(): ?string
     {
@@ -59,9 +59,9 @@ final class AuthorDataTransferObject
     }
     /**
      *
-     * @return string
+     * @return null|string
      */
-    public function getSurame(): string
+    public function getSurame(): ?string
     {
         return $this->surname;
     }
@@ -85,9 +85,9 @@ final class AuthorDataTransferObject
     }
 
     /**
-     * @return int|null
+     * @return null|array
      */
-    public function getApprove(): ?int
+    public function getApprove(): ?array
     {
         return $this->approved;
     }

@@ -40,9 +40,9 @@ interface AuthorRepositoryInterface
      *
      * @param AuthorDataTransferObject|null $search
      * @param array $columns
-     * @return Collection|null
+     * @return ?LengthAwarePaginator|null
      */
-    public function getBySearch( ?AuthorDataTransferObject $search, array $columns = ['*']): ?Collection;
+    public function getBySearch( ?AuthorDataTransferObject $search, array $columns = ['*']): ?LengthAwarePaginator;
     /**
      * Return upadted record if it exists
      *
