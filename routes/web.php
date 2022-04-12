@@ -49,6 +49,6 @@ Route::middleware(['auth','verified'])->group(function (){
     Route::resource('publisher', PublisherController::class);
     Route::resource('tag', TagController::class);
 
-    Route::post('/author/search', [AuthorController::class,'search'])->name('author.search');
+    Route::post('/author/approve', [AuthorController::class,'approve'])->name('author.approve');
 });
 

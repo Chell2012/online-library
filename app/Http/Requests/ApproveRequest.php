@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property mixed $approved
+ * @property mixed $id
+ */
 class ApproveRequest extends FormRequest
 {
     /**

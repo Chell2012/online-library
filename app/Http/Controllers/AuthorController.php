@@ -12,6 +12,7 @@ use App\Http\Requests\ApproveRequest;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class AuthorController extends Controller
 {
@@ -34,27 +35,23 @@ class AuthorController extends Controller
      */
     public function index(AuthorSearchRequest $request): Response
     {
-        if ($request->user()->can('view-not-approved-'.Author::class)){
-            $authorDTO = new AuthorDataTransferObject(
-                $request->name,
-                $request->surname,
-                $request->middle_name,
-                ($request->birth_date!=null)?Carbon::parse($request->birth_date):null,
-                ($request->death_date!=null)?Carbon::parse($request->death_date):null,
-                ($request->approved!=null)?array_map(function($value) { return (int)$value; }, $request->approved):null
-            );
-        }else{
-            $authorDTO = new AuthorDataTransferObject(
-                $request->name,
-                $request->surname,
-                $request->middle_name,
-                ($request->birth_date!=null)?Carbon::parse($request->birth_date):null,
-                ($request->death_date!=null)?Carbon::parse($request->death_date):null,
+        $authorDTO = new AuthorDataTransferObject(
+            $request->name,
+            $request->surname,
+            $request->middle_name,
+            ($request->birth_date!=null)?Carbon::parse($request->birth_date):null,
+            ($request->death_date!=null)?Carbon::parse($request->death_date):null,
+            ($request->user()->can('view-not-approved-'.Author::class)) ?
+                (($request->approved!=null) ?
+                    array_map(function($value) { return (int)$value; }, $request->approved) :
+                    null
+                ) :
                 [1,2]
-            );
-        }
+        );
         $authors = $this->authorRepository->getBySearch($authorDTO);
         return response()->view('author.list',[
+            'author_class'=>Author::class,
+            'user'=>$request->user(),
             'approved_status'=>require_once database_path("data/status_list.php"),
             'authors'=>$authors,
             'pageTitle' => __('Авторы'),
@@ -62,35 +59,49 @@ class AuthorController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Show form for a new record
      *
-     *
-     * @param AuthorStoreRequest $request
      * @return Response
      */
-    public function store(AuthorStoreRequest $request)
+    public function create(): Response
     {
-        $birth_date = new Carbon($request->birth_date);
-        $death_date = new Carbon($request->death_date);
+        return response()->view('author.create', [
+            'author_class'=>Author::class,
+            'user'=>Auth::user(),
+            'pageTitle' => __('Новый автор')
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param AuthorStoreRequest $request
+     * @return RedirectResponse
+     */
+    public function store(AuthorStoreRequest $request): RedirectResponse
+    {
         $authorDTO = new AuthorDataTransferObject(
             $request->name,
             $request->surname,
             $request->middle_name,
-            $birth_date,
-            $death_date
+            ($request->birth_date!=null)?Carbon::parse($request->birth_date):null,
+            ($request->death_date!=null)?Carbon::parse($request->death_date):null,
         );
-        return  response()->json($this->authorRepository->new($authorDTO));
+        $author = $this->authorRepository->new($authorDTO);
+        return response()->redirectToRoute('author.show', ['author'=>$author->id])->with('success', 'Запись сохранена');
     }
 
     /**
      * Approve or deapprove author
      *
      * @param ApproveRequest $request
-     * @return Response
+     * @return RedirectResponse
      */
-    public function approve(ApproveRequest $request)
+    public function approve(ApproveRequest $request): RedirectResponse
     {
-        return response()->json($this->authorRepository->approve($request->approved, $request->id));
+        return ($this->authorRepository->approve($request->approved, $request->id))?
+            redirect()->back()->with('success', 'Запись обновлена'):
+            redirect()->back()->with('error', 'Что-то пошло не так');
     }
 
     /**
@@ -99,9 +110,29 @@ class AuthorController extends Controller
      * @param Author $author
      * @return Response
      */
-    public function show(Author $author)
+    public function show(Author $author): Response
     {
-        return response()->json($this->authorRepository->getById($author->id));
+        $authorCard = $this->authorRepository->getById($author->id);
+        return response()->view('author.show',[
+            'author_class'=>Author::class,
+            'user'=>Auth::user(),
+            'approved_status'=>require_once database_path("data/status_list.php"),
+            'author'=>$authorCard,
+            'pageTitle' => __($authorCard->surname.' '.$authorCard->name.' '.$authorCard->middle_name)
+            ]);
+    }
+
+    /**
+     * Show form for a new record
+     *
+     * @return Response
+     */
+    public function edit(Author $author): Response
+    {
+        return response()->view('author.edit', [
+            'author'=>$author,
+            'pageTitle' => __('Редактирование '.$author->surname.' '.$author->name.' '.$author->middle_name)
+        ]);
     }
 
     /**
@@ -109,30 +140,33 @@ class AuthorController extends Controller
      *
      * @param AuthorUpdateRequest $request
      * @param Author $author
-     * @return Response
+     * @return RedirectResponse
      */
-    public function update(AuthorUpdateRequest $request, Author $author)
+    public function update(AuthorUpdateRequest $request, Author $author): RedirectResponse
     {
-        $birth_date = new Carbon($request->birth_date);
-        $death_date = new Carbon($request->death_date);
         $authorDTO = new AuthorDataTransferObject(
             $request->name,
             $request->surname,
             $request->middle_name,
-            $birth_date,
-            $death_date
+            ($request->birth_date!=null)?Carbon::parse($request->birth_date):null,
+            ($request->death_date!=null)?Carbon::parse($request->death_date):null,
         );
-        return response()->json($this->authorRepository->update($author->id, $authorDTO));
+        $authorUpdate = $this->authorRepository->update($author->id, $authorDTO);
+        return ($authorUpdate)?
+            response()->redirectToRoute('author.show', ['author'=>$authorUpdate->id])->with('success', 'Запись обновлена'):
+            redirect()->back()->with('error', 'Что-то пошло не так');
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  Author $author
-     * @return Response
+     * @return RedirectResponse
      */
-    public function destroy(Author $author)
+    public function destroy(Author $author): RedirectResponse
     {
-        return response()->json($this->authorRepository->delete($author->id));
+        return ($this->authorRepository->delete($author->id))?
+            response()->redirectToRoute('author.index')->with('success', 'Запись удалена'):
+            response()->redirectToRoute('author.index')->with('error', 'Что-то пошло не так');
     }
 }

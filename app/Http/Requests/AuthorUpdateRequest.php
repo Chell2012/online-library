@@ -4,6 +4,13 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property mixed $birth_date
+ * @property mixed $death_date
+ * @property mixed $name
+ * @property mixed $surname
+ * @property mixed $middle_name
+ */
 class AuthorUpdateRequest extends FormRequest
 {
     /**

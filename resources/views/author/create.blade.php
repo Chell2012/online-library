@@ -1,45 +1,55 @@
 @extends('layouts.app')
+@section('plugins.Select2', true)
 @section('content')
+    <div class="card card-primary">
+        <div class="card-header">
+            <h3 class="card-title">Фильтр</h3>
+        </div>
+        <div class="card-body">
+            <form id="search-form" action="{{ route('author.store') }}" method="POST">
+                @csrf
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Имя</label>
+                            <input name="name" type="text" class="form-control form-control-border" placeholder="Имя" value={{ old('name') }}>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Отчество</label>
+                            <input name="middle_name" type="text" class="form-control form-control-border" placeholder="Отчество" value={{ old('middle_name') }}>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Фамилия</label>
+                            <input name="surname" type="text" class="form-control form-control-border" placeholder="Фамилия" value={{ old('surname') }}>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Дата рождения</label>
+                            <input name="birth_date" type="date" class="form-control form-control-border" value={{ old('birth_date') }}>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Дата смерти</label>
+                            <input name="death_date" type="date" class="form-control form-control-border" value={{ old('death_date') }}>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="row">
-        <div class="col-lg-12 margin-tb">
-            <div class="pull-left">
-                <h2>Add New Post</h2>
-            </div>
+
+            </form>
+        </div>
+        <div class="card-footer">
+            <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Submit</button>
         </div>
     </div>
-
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form action="{{ route('book.store') }}" method="POST">
-        @csrf
-
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <div class="form-group">
-                    <strong>Name:</strong>
-                    <input type="text" name="title" class="form-control" placeholder="Title">
-                </div>
-            </div>
-
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <div class="form-group">
-                    <strong>Description:</strong>
-                    <textarea class="form-control" style="height:150px" name="description" placeholder="Description"></textarea>
-                </div>
-            </div>
-
-            <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-        </div>
-    </form>
 @endsection

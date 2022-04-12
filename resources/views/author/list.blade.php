@@ -5,7 +5,6 @@
         <div class="card-header">
             <h3 class="card-title">Фильтр</h3>
         </div>
-
         <div class="card-body">
             <form id="search-form" action="{{ route('author.index') }}" method="GET">
                 @csrf
@@ -44,70 +43,85 @@
                             <input name="death_date" type="date" class="form-control form-control-border" value={{ old('death_date') }}>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Статус</label>
-                            <select id="status" name="approved[]" class="form-control approve-selection" multiple="multiple">
-                                @foreach($approved_status as $status => $status_name)
-                                    <option value="{{ $status }}">{{ $status_name }}</option>
-                                @endforeach
-                            </select>
+                    @if ($user->can('view-not-approved-'.$author_class))
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Статус</label>
+                                <select id="status" name="approved[]" class="form-control approve-selection" multiple="multiple">
+                                    @foreach($approved_status as $status => $status_name)
+                                        <option value="{{ $status }}">{{ $status_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
-
-
             </form>
         </div>
         <div class="card-footer">
-            <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Submit</button>
+            <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Найти</button>
         </div>
     </div>
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Авторы</h3>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Авторы</h3>
+        </div>
 
-            <div class="card-body">
-                <a class="btn btn-primary" href="{{ route('author.create') }}">Создать</a>
-                <table class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th style="width: 10px">#</th>
-                        <th>Автор</th>
-                        <th style="width: 40px"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach ($authors as $author)
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <a class="btn btn-primary" href="{{ route('author.create') }}">Добавить</a>
+                </div>
+            </div>
+            <div style="margin-top: 20px"></div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <thead>
                         <tr>
-                            <td>{{$author->id}}</td>
-                            <td>
-                                {{ $author->name }} {{ $author->middle_name }} {{ $author->surname }}
-                                <br> Дата рождения: {{ date('d-m-Y', strtotime($author->birth_date)) }}
-                                <br> Дата смерти: {{ date('d-m-Y', strtotime($author->death_date)) }}
-                            </td>
-                            <td>
-                                <a class="btn btn-info" href="{{ route('author.show',$author->id) }}">Show</a>
-                                <a class="btn btn-primary" href="{{ route('author.update',$author->id) }}">Edit</a>
-                                <form action="{{ route('author.destroy',$author->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                </form>
-                            </td>
+                            <th style="width: 10px">#</th>
+                            <th>Автор</th>
+                            <th style="width: 40px"></th>
                         </tr>
-                    @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                        @foreach ($authors as $author)
+                            <tr>
+                                <td>{{$author->id}}</td>
+                                <td>
+                                    {{ $author->name }} {{ $author->middle_name }} {{ $author->surname }}
+                                    <br> Дата рождения: {{ ($author->birth_date) ? date('d-m-Y', strtotime($author->birth_date)): 'Отсутствует' }}
+                                    <br> Дата смерти: {{ ($author->death_date) ? date('d-m-Y', strtotime($author->death_date)): 'Отсутствует' }}
+                                </td>
+                                <td>
+                                    @if ($user->can('view-'.$author_class))
+                                        <a class="btn btn-info" href="{{ route('author.show',$author->id) }}">Show</a>
+                                    @endif
+                                    @if ($user->can('update-'.$author_class))
+                                        <a class="btn btn-primary" href="{{ route('author.edit',$author->id) }}">Edit</a>
+                                    @endif
+                                    @if ($user->can('delete-'.$author_class))
+                                        <form action="{{ route('author.destroy',$author->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    @endif
 
-            <div class="card-footer clearfix">
-                <div class="row">
-                    <div class="col-md-3">
-                        {{ $authors->links() }}
-                    </div>
+
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer clearfix">
+            <div class="row">
+                <div class="col-md-3">
+                    {{ $authors->links() }}
                 </div>
             </div>
         </div>

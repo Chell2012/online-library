@@ -28,9 +28,7 @@ class BookService
      *
      * @param BookRepositoryInterface $bookRepository
      */
-    public function __construct(
-        BookRepositoryInterface $bookRepository
-    ){
+    public function __construct(BookRepositoryInterface $bookRepository){
         $this->bookRepository = $bookRepository;
     }
     /**

@@ -13,7 +13,7 @@ class Controller extends BaseController
 
     /**
      * Add filter to resource list for policy action
-     * 
+     *
      * @return array
      */
     protected function resourceAbilityMap()
@@ -22,6 +22,7 @@ class Controller extends BaseController
             'index' => 'viewOnlyApproved',
             'viewNotApproved' => 'viewAny',
             'show' => 'view',
+            'create'=>'create',
             'store' => 'create',
             'edit' => 'update',
             'update' => 'update',
@@ -31,11 +32,11 @@ class Controller extends BaseController
     }
     /**
      * Add filter to actions without model dependency for policy action
-     * 
-     * @return array 
+     *
+     * @return array
      */
-    protected function resourceMethodsWithoutModels()
+    protected function resourceMethodsWithoutModels(): array
     {
-        return ['viewNotApproved', 'index', 'store', 'approve'];
+        return ['viewNotApproved', 'index', 'create', 'store', 'approve'];
     }
 }

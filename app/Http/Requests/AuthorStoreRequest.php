@@ -5,6 +5,13 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @property mixed $name
+ * @property mixed $surname
+ * @property mixed $middle_name
+ * @property mixed $birth_date
+ * @property mixed $death_date
+ */
 class AuthorStoreRequest extends FormRequest
 {
     /**
