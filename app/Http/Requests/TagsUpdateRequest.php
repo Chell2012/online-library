@@ -5,6 +5,10 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @property string $title
+ * @property int $category_id
+ */
 class TagsUpdateRequest extends FormRequest
 {
     /**

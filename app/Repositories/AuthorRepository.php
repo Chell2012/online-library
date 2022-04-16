@@ -45,12 +45,12 @@ class AuthorRepository implements AuthorRepositoryInterface
      * Return collection of records based on search
      *
      * @param AuthorDataTransferObject|null $search
+     * @param bool $paginate
      * @param array $columns
-     * @return LengthAwarePaginator|null
+     * @return LengthAwarePaginator|Collection
      */
-    public function getBySearch( ?AuthorDataTransferObject $search, array $columns = ['*']): ?LengthAwarePaginator
+    public function getBySearch(AuthorDataTransferObject $search = null, bool $paginate = true, array $columns = ['*'])
     {
-
         if ($search->getApprove()!=null){
             $list = Author::whereIn('approved', $search->getApprove());
         } else {
@@ -71,7 +71,7 @@ class AuthorRepository implements AuthorRepositoryInterface
         if ($search->getDeathDate()!=null){
             $list = $list->where('death_date', $search->getDeathDate());
         }
-        return $list->paginate($perPage = 15, $columns);
+        return ($paginate)? $list->paginate($perPage = 15, $columns) : $list->get();
     }
     /**
      * Return record if it exists
@@ -83,46 +83,34 @@ class AuthorRepository implements AuthorRepositoryInterface
     {
         return Author::query()->find($id);
     }
-    /**
-     * Return record if it exists
-     *
-     * @param int $id
-     * @return Author|null
-     */
-    public function getApprovedById(int $id): ?Author
-    {
-        if ($record = Author::query()->find($id)){
-            if ($record->approved == 1){
-                return $record;
-            }
-        }
-        return null;
-    }
 
     /**
      * Return upadted record if it exists
      *
      * @param int $id
-     * @param AuthorDataTransferObject $author
+     * @param AuthorDataTransferObject $authorDTO
      * @return Author|null
      */
-    public function update(int $id, AuthorDataTransferObject $author): ?Author
+    public function update(int $id, AuthorDataTransferObject $authorDTO): ?Author
     {
         $record = $this->getById($id);
         if ($record === null){
             return null;
         }
-        $record->name = $author->getName();
-        if ($author->getMiddleName()!=null){
-            $record->middle_name = $author->getMiddleName();
+        if ($authorDTO->getName()!=null) {
+            $record->name = $authorDTO->getName();
         }
-        $record->surname = $author->getSurame();
-
-        if ($author->getBirthDate()!=null){
-            $record->birth_date = $author->getBirthDate();
+        if ($authorDTO->getMiddleName()!=null){
+            $record->middle_name = $authorDTO->getMiddleName();
         }
-        if ($author->getDeathDate()!=null){
-            $record->death_date = $author->getDeathDate();
+        if ($authorDTO->getSurame()!=null) {
+            $record->surname = $authorDTO->getSurame();
+        }
+        if ($authorDTO->getBirthDate()!=null){
+            $record->birth_date = $authorDTO->getBirthDate();
+        }
+        if ($authorDTO->getDeathDate()!=null){
+            $record->death_date = $authorDTO->getDeathDate();
         }
         $record->save();
         return $record;
@@ -140,14 +128,18 @@ class AuthorRepository implements AuthorRepositoryInterface
         }
         return false;
     }
+
     /**
      * Create new record
      *
-     * @param array $author
-     * @return Author
+     * @param AuthorDataTransferObject $author
+     * @return Author|null
      */
-    public function new(AuthorDataTransferObject $author): Author
+    public function new(AuthorDataTransferObject $author): ?Author
     {
+        if ($author->getName()==null || $author->getSurame()==null){
+            return null;
+        }
         return Author:: query()->create([
             'name'=>$author->getName(),
             'surname'=>$author->getSurame(),

@@ -2,29 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\CategoryDataTransferObject;
 use App\Http\Requests\ApproveRequest;
+use App\Http\Requests\CategorySearchRequest;
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Repositories\CategoryRepositoryInterface;
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
+use Illuminate\Http\Response;
 
 class CategoryController extends Controller
 {
     private $categoryRepository;
     /**
-     * 
+     *
      * @param CategoryRepositoryInterface $categoryRepository
      */
     public function __construct(CategoryRepositoryInterface $categoryRepository){
         $this->categoryRepository = $categoryRepository;
         $this->authorizeResource(Category::class);
     }
-    
+
     /**
      * Display a listing of all resources.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function viewNotApproved()
     {
@@ -34,18 +38,27 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param CategorySearchRequest $request
+     * @return JsonResponse|Response
      */
-    public function index()
+    public function index(CategorySearchRequest $request)
     {
-        return response()->json($this->categoryRepository->getAllApproved());
+        $categoryDTO = new CategoryDataTransferObject(
+            $request->title
+        );
+        return
+            ($request->return_json)?
+                response()
+                    ->json($this->categoryRepository
+                    ->getBySearch($categoryDTO,$request->pagination===null ? true : $request->pagination)) :
+                response()->view('category.index');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param CategoryStoreRequest $request
+     * @return Response
      */
     public function store(CategoryStoreRequest $request)
     {
@@ -55,8 +68,8 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
+     * @param Category $category
+     * @return Response
      */
     public function show(Category $category)
     {
@@ -67,8 +80,8 @@ class CategoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
+     * @param Category $category
+     * @return Response
      */
     public function update(CategoryUpdateRequest $request, Category $category)
     {
@@ -78,8 +91,8 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Category  $category
-     * @return \Illuminate\Http\Response
+     * @param Category $category
+     * @return Response
      */
     public function destroy(Category $category)
     {
@@ -88,9 +101,9 @@ class CategoryController extends Controller
 
     /**
      * Approve or deapprove author
-     * 
+     *
      * @param  App\Http\Requests\ApproveRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function approve(ApproveRequest $request)
     {

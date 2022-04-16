@@ -12,6 +12,8 @@ use Illuminate\Foundation\Http\FormRequest;
  * @property Carbon $birth_date
  * @property Carbon $death_date
  * @property array $approved
+ * @property bool $pagination
+ * @property bool return_json
  */
 class AuthorSearchRequest extends FormRequest
 {
@@ -40,6 +42,8 @@ class AuthorSearchRequest extends FormRequest
             'death_date'=>'date_format:"Y-m-d"|nullable',
             'approved'=>'array|nullable',
             'approved.*'=>'int|nullable',
+            'pagination'=>'nullable|boolean',
+            'return_json'=>'nullable|boolean',
         ];
     }
 }

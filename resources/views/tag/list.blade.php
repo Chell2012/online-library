@@ -6,44 +6,24 @@
             <h3 class="card-title">Фильтр</h3>
         </div>
         <div class="card-body">
-            <form id="search-form" action="{{ route('author.index') }}" method="GET">
+            <form id="search-form" action="{{ route('tag.index') }}" method="GET">
                 @csrf
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Имя</label>
-                            <input name="name" type="text" class="form-control form-control-border" placeholder="Имя" value={{ old('name') }}>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Отчество</label>
-                            <input name="middle_name" type="text" class="form-control form-control-border" placeholder="Отчество" value={{ old('middle_name') }}>
+                            <label>Тема</label>
+                            <input name="title" type="text" class="form-control form-control-border" placeholder="Тема" value={{ old('title') }}>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Фамилия</label>
-                            <input name="surname" type="text" class="form-control form-control-border" placeholder="Фамилия" value={{ old('surname') }}>
+                            <label>Категория</label>
+                            <select name="category_id" class="form-control category-selection"></select>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Дата рождения</label>
-                            <input name="birth_date" type="date" class="form-control form-control-border" value={{ old('birth_date') }}>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Дата смерти</label>
-                            <input name="death_date" type="date" class="form-control form-control-border" value={{ old('death_date') }}>
-                        </div>
-                    </div>
-                    @if ($user->can('view-not-approved-'.$author_class))
+                    @if ($user->can('view-not-approved-'.$tag_class))
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Статус</label>
@@ -64,13 +44,13 @@
     </div>
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Авторы</h3>
+            <h3 class="card-title">Темы</h3>
         </div>
 
         <div class="card-body">
             <div class="row">
                 <div class="col-md-12">
-                    <a class="btn btn-primary" href="{{ route('author.create') }}">Добавить</a>
+                    <a class="btn btn-primary" href="{{ route('tag.create') }}">Добавить</a>
                 </div>
             </div>
             <div style="margin-top: 20px"></div>
@@ -80,35 +60,32 @@
                         <thead>
                         <tr>
                             <th style="width: 10px">#</th>
-                            <th>Автор</th>
+                            <th>Тема</th>
                             <th style="width: 40px"></th>
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach ($authors as $author)
+                        @foreach ($tags as $tag)
                             <tr>
-                                <td>{{$author->id}}</td>
+                                <td>{{$tag->id}}</td>
                                 <td>
-                                    {{ $author->name }} {{ $author->middle_name }} {{ $author->surname }}
-                                    <br> Дата рождения: {{ ($author->birth_date) ? date('d-m-Y', strtotime($author->birth_date)): 'Отсутствует' }}
-                                    <br> Дата смерти: {{ ($author->death_date) ? date('d-m-Y', strtotime($author->death_date)): 'Отсутствует' }}
+                                    {{ $tag->title }}
+                                    <br> Категория: {{ ($tag->category_id) }}
                                 </td>
                                 <td>
-                                    @if ($user->can('view-'.$author_class))
-                                        <a class="btn btn-info" href="{{ route('author.show',$author->id) }}">Show</a>
+                                    @if ($user->can('view-'.$tag_class))
+                                        <a class="btn btn-info" href="{{ route('tag.show',$tag->id) }}">Show</a>
                                     @endif
-                                    @if ($user->can('update-'.$author_class))
-                                        <a class="btn btn-primary" href="{{ route('author.edit',$author->id) }}">Edit</a>
+                                    @if ($user->can('update-'.$tag_class))
+                                        <a class="btn btn-primary" href="{{ route('tag.edit',$tag->id) }}">Edit</a>
                                     @endif
-                                    @if ($user->can('delete-'.$author_class))
-                                        <form action="{{ route('author.destroy',$author->id) }}" method="POST">
+                                    @if ($user->can('delete-'.$tag_class))
+                                        <form action="{{ route('tag.destroy',$tag->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger">Delete</button>
                                         </form>
                                     @endif
-
-
                                 </td>
                             </tr>
                         @endforeach
@@ -117,11 +94,10 @@
                 </div>
             </div>
         </div>
-
         <div class="card-footer clearfix">
             <div class="row">
                 <div class="col-md-3">
-                    {{ $authors->links() }}
+                    {{ $tags->links() }}
                 </div>
             </div>
         </div>
@@ -130,8 +106,38 @@
 
 @section('js')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function()
+        {
             $('.approve-selection').select2();
+            $('.category-selection').select2({
+                placeholder: 'Категория',
+                ajax: {
+                    url: '/category',
+                    dataType: 'json',
+                    delay: 500,
+                    type: "GET",
+                    data: function (params)
+                    {
+                        return {
+                            title: params.term,
+                            pagination: 0,
+                            return_json:1,
+                        };
+                    },
+                    processResults: function (data)
+                    {
+                        return {
+                            results: $.map(data, function (item) {
+                                return {
+                                    text: item.title,
+                                    id: item.id
+                                }
+                            })
+                        };
+                    },
+                    cache: true
+                }
+            });
         });
     </script>
 @stop

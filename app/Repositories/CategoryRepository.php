@@ -8,8 +8,10 @@
 
 namespace App\Repositories;
 
+use App\DTO\CategoryDataTransferObject;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Description of PublisherRepository
@@ -20,7 +22,7 @@ class CategoryRepository implements CategoryRepositoryInterface
 {
     /**
      * Return collection of records
-     * 
+     *
      * @param array|mixed $columns
      * @return Collection|null
      */
@@ -30,7 +32,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     }
     /**
      * Return collection of approved records
-     * 
+     *
      * @param array $columns
      * @return Collection|null
      */
@@ -38,9 +40,30 @@ class CategoryRepository implements CategoryRepositoryInterface
     {
         return Category::all($columns)->where('approved', '>', '0');
     }
+
+    /**
+     * Return collection of records based on search
+     *
+     * @param CategoryDataTransferObject|null $search
+     * @param bool $paginate
+     * @param array $columns
+     * @return LengthAwarePaginator|Collection
+     */
+    public function getBySearch(CategoryDataTransferObject $search = null, bool $paginate = true, array $columns = ['*'])
+    {
+        if ($search->getApproved()!=null){
+            $list = Category::whereIn('approved', $search->getApprove());
+        } else {
+            $list = Category::where('approved', '>', '0');
+        }
+        if ($search->getTitle()!=null){
+            $list = $list->where('title','like', '%'.$search->getTitle().'%');
+        }
+        return ($paginate)? $list->paginate($perPage = 15, $columns) : $list->get();
+    }
     /**
      * Return record if it exists
-     * 
+     *
      * @param int $id
      * @return Category|null
      */
@@ -50,7 +73,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     }
     /**
      * Delete record if it exists
-     * 
+     *
      * @param int $id
      * @return bool
      */
@@ -63,7 +86,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     }
     /**
      * Create new record
-     * 
+     *
      * @param string $title
      * @return Category
      */
@@ -73,7 +96,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     }
     /**
      * Update record if it exists
-     * 
+     *
      * @param int $id
      * @param string $title
      * @return Category|null
@@ -87,7 +110,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     }
     /**
      * Approve or deapprove published record
-     * 
+     *
      * @param int $approved
      * @param int $id
      * @return bool
@@ -101,6 +124,6 @@ class CategoryRepository implements CategoryRepositoryInterface
                 return $model->save();
             }
         }
-        return false; 
+        return false;
     }
 }

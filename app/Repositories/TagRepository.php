@@ -8,8 +8,9 @@
 
 namespace App\Repositories;
 
+use App\DTO\TagDataTransferObject;
 use App\Models\Tag;
-use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -21,27 +22,51 @@ class TagRepository implements TagRepositoryInterface
 {
     /**
      * Return collection of records
-     * 
+     *
      * @param array|mixed $columns
      * @return Collection|null
      */
-    public function getAll($columns = ['*']): ?Paginator
+    public function getAll($columns = ['*']): ?Collection
     {
-        return Tag::paginate(15);
+        return Tag::all($columns);
     }
     /**
      * Return collection of approved records
-     * 
+     *
      * @param array $columns
      * @return Collection|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Paginator
+    public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator
     {
-        return Tag::where('approved', '>', '0')->paginate(15);
+        return Tag::where('approved', '>', '0')->paginate(15)->paginate($perPage = 15, $columns);
+    }
+
+    /**
+     * Return collection of records based on search
+     *
+     * @param TagDataTransferObject|null $search
+     * @param bool $paginate
+     * @param array $columns
+     * @return LengthAwarePaginator|Collection
+     */
+    public function getBySearch(TagDataTransferObject $search = null, bool $paginate = true, array $columns = ['*'])
+    {
+        if ($search->getApproved()!=null){
+            $list = Tag::whereIn('approved', $search->getApproved());
+        } else {
+            $list = Tag::where('approved', '>', '0');
+        }
+        if ($search->getTitle()!=null){
+            $list = $list->where('title', $search->getTitle());
+        }
+        if ($search->getCategory()!=null){
+            $list = $list->where('category_id', $search->getCategory());
+        }
+        return ($paginate)? $list->paginate($perPage = 15, $columns): $list->get();
     }
     /**
      * Return record if it exists
-     * 
+     *
      * @param int $id
      * @return Tag|null
      */
@@ -51,7 +76,7 @@ class TagRepository implements TagRepositoryInterface
     }
     /**
      * Delete record if it exists
-     * 
+     *
      * @param int $id
      * @return bool
      */
@@ -64,24 +89,24 @@ class TagRepository implements TagRepositoryInterface
     }
     /**
      * Create new record
-     * 
+     *
      * @param string $title
      * @param int $categoryId
      * @return Tag
      */
-    public function new(string $title, int $categoryId = null): Tag
+    public function new(TagDataTransferObject $tagDTO): ?Tag
     {
-        if ($categoryId === null){
-            $categoryId = 1;
+        if ($tagDTO->getTitle()==null){
+            return null;
         }
         return Tag::query()->create([
-            'title' => $title,
-            'category_id' => $categoryId
+            'title' => $tagDTO->getTitle(),
+            'category_id' => ($tagDTO->getCategory()!=null) ? $tagDTO->getCategory() : 1
         ]);
     }
     /**
      * Approve or deapprove published record
-     * 
+     *
      * @param int $approved
      * @param int $id
      * @return bool
@@ -95,22 +120,29 @@ class TagRepository implements TagRepositoryInterface
                 return $model->save();
             }
         }
-        return false; 
+        return false;
     }
+
     /**
      * Update record if it exists
-     * 
+     *
      * @param int $id
-     * @param string $title
-     * @param int $categoryId
+     * @param TagDataTransferObject $tagDTO
      * @return Tag|null
      */
-    public function update(int $id, string $title, int $categoryId): ?Tag
-    {   
-        $tag = Tag::query()->find($id);
-        $tag->category_id = $categoryId;
-        $tag->title = $title;
-        $tag->save();
-        return $tag;
+    public function update(int $id, TagDataTransferObject $tagDTO): ?Tag
+    {
+        $record = $this->getById($id);
+        if ($record === null){
+            return null;
+        }
+        if ($tagDTO->getTitle()!=null){
+            $record->title = $tagDTO->getTitle();
+        }
+        if ($tagDTO->getCategory()!=null){
+            $record->category_id= $tagDTO->getCategory();
+        }
+        $record->save();
+        return $record;
     }
 }

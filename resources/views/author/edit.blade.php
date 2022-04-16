@@ -3,7 +3,7 @@
 @section('content')
     <div class="card card-primary">
         <div class="card-header">
-            <h3 class="card-title">Фильтр</h3>
+            <h3 class="card-title">Редактирование</h3>
         </div>
         <div class="card-body">
             <form id="search-form" action="{{ route('author.update',$author->id) }}" method="POST">
@@ -51,4 +51,4 @@
             <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Submit</button>
         </div>
     </div>
-@endsection
+@stop

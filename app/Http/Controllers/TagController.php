@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\DTO\TagDataTransferObject;
 use App\Http\Requests\ApproveRequest;
+use App\Http\Requests\TagSearchRequest;
 use App\Models\Tag;
 use App\Http\Requests\TagsStoreRequest;
 use App\Http\Requests\TagsUpdateRequest;
 use App\Repositories\TagRepositoryInterface;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class TagController extends Controller
 {
     private $tagRepository;
     /**
-     * 
+     *
      * @param TagRepositoryInterface $tagRepository
      */
     public function __construct(TagRepositoryInterface $tagRepository){
@@ -21,73 +27,140 @@ class TagController extends Controller
     }
 
     /**
-     * Display a listing of all resources.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function viewNotApproved()
-    {
-        return response()->json($this->tagRepository->getAll());
-    }
-    
-    /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param TagSearchRequest $request
+     * @return JsonResponse|Response
      */
-    public function index()
+    public function index(TagSearchRequest $request)
     {
-        return response()->json($this->tagRepository->getAllApproved());
+        $tagDTO = new TagDataTransferObject(
+            $request->title,
+            $request->category_id,
+            ($request->user()->can('view-not-approved-'.Tag::class)) ?
+                (($request->approved!=null) ?
+                    array_map(function($value) { return (int)$value; }, $request->approved) :
+                    null
+                ) :
+                [1,2]
+        );
+        $tags = $this->tagRepository->getBySearch($tagDTO, $request->pagination===null ? true : $request->pagination);
+        return ($request->return_json)?
+            response()->json($tags) :
+            response()->view('tag.list',[
+            'tag_class'=>Tag::class,
+            'user'=>$request->user(),
+            'approved_status'=>require_once database_path("data/status_list.php"),
+            'tags'=>$tags,
+            'pageTitle' => __('Темы'),
+        ]);
     }
+
     /**
-     * Store a newly created resource in storage.   
+     * Show form for a new record
      *
-     * @param \App\Http\Requests\TagsStoreRequest $request 
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
-    public function store(TagsStoreRequest $request)
+    public function create(): Response
     {
-        return response()->json($this->tagRepository->new($request->title, $request->category_id));
+        return response()->view('tag.create', [
+            'author_class'=>Tag::class,
+            'user'=>Auth::user(),
+            'pageTitle' => __('Новая тема')
+        ]);
     }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param TagsStoreRequest $request
+     * @return RedirectResponse
+     */
+    public function store(TagsStoreRequest $request): RedirectResponse
+    {
+        var_dump('sd');
+        $tagDTO = new TagDataTransferObject(
+            $request->title,
+            $request->category_id
+        );
+        $tag = $this->tagRepository->new($tagDTO);
+        return response()->redirectToRoute('tag.show',['tag'=>$tag->id])->with('success', 'Запись сохранена');
+    }
+
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Tag  $tag
-     * @return \Illuminate\Http\Response
+     * @param Tag $tag
+     * @param bool $returnJson
+     * @return JsonResponse|Response
      */
-    public function show(Tag $tag)
+    public function show(Tag $tag, bool $returnJson = false)
     {
-        return  response()->json($this->tagRepository->getById($tag->id));
+        $tagCard = $this->tagRepository->getById($tag->id);
+        return  ($returnJson)?
+            response()->json($tag) :
+            response()->view('tag.show',[
+            'tag_class'=>Tag::class,
+            'user'=>Auth::user(),
+            'approved_status'=>require_once database_path("data/status_list.php"),
+            'tag'=>$tagCard,
+            'pageTitle'=>$tagCard->title
+        ]);
+    }
+
+    /**
+     * Show form for a new record
+     *
+     * @param Tag $tag
+     * @return Response
+     */
+    public function edit(Tag $tag): Response
+    {
+        return response()->view('tag.edit', [
+            'tag'=>$tag,
+            'pageTitle' => __('Редактирование '.$tag->title)
+        ]);
     }
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\TagsUpdateRequest  $request
-     * @param  \App\Models\Tag  $tag
-     * @return \Illuminate\Http\Response
+     * @param TagsUpdateRequest $request
+     * @param Tag $tag
+     * @return RedirectResponse
      */
-    public function update(TagsUpdateRequest $request, Tag $tag)
+    public function update(TagsUpdateRequest $request, Tag $tag): RedirectResponse
     {
-        return response()->json($this->tagRepository->update($tag->id, $request->title, $request->category_id));
+        $tagDTO = new TagDataTransferObject(
+            $request->title,
+            $request->category_id
+        );
+        $tagUpdate = $this->tagRepository->update($tag->id, $tagDTO);
+        return ($tagUpdate)?
+            response()->redirectToRoute('tag.show', ['tag'=>$tagUpdate->id])->with('success', 'Запись обновлена'):
+            redirect()->back()->with('error', 'Что-то пошло не так');
     }
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Tag  $tag
-     * @return \Illuminate\Http\Response
+     * @param  Tag  $tag
+     * @return RedirectResponse
      */
-    public function destroy(Tag $tag)
+    public function destroy(Tag $tag): RedirectResponse
     {
-        return response()->json($this->tagRepository->delete($tag->id));
+        return ($this->tagRepository->delete($tag->id))?
+            response()->redirectToRoute('tag.index')->with('success', 'Запись удалена'):
+            response()->redirectToRoute('tag.index')->with('error', 'Что-то пошло не так');
     }
     /**
      * Approve or deapprove author
-     * 
-     * @param  App\Http\Requests\ApproveRequest  $request
-     * @return \Illuminate\Http\Response
+     *
+     * @param  ApproveRequest  $request
+     * @return RedirectResponse
      */
-    public function approve(ApproveRequest $request)
+    public function approve(ApproveRequest $request): RedirectResponse
     {
-        return response()->json($this->tagRepository->approve($request->approved, $request->id));
+        return ($this->tagRepository->approve($request->approved, $request->id))?
+            redirect()->back()->with('success', 'Запись обновлена'):
+            redirect()->back()->with('error', 'Что-то пошло не так');
     }
 }

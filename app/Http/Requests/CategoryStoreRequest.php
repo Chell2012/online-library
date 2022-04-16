@@ -5,6 +5,9 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @property mixed $title
+ */
 class CategoryStoreRequest extends FormRequest
 {
     /**

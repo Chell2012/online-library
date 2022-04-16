@@ -3,13 +3,13 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
 /**
- * @property mixed $title
- * @property mixed $category_id
+ * @property string $title
+ * @property bool $pagination
+ * @property bool $return_json
  */
-class TagsStoreRequest extends FormRequest
+class CategorySearchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,8 +29,9 @@ class TagsStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title'=>'required|string|unique:App\Models\Tag|max:255',
-            'category_id' => 'nullable|integer|exists:App\Models\Category,id'
+            'title'=>'nullable|string|max:255',
+            'pagination'=>'nullable|boolean',
+            'return_json'=>'nullable|boolean',
         ];
     }
 }

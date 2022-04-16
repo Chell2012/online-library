@@ -39,18 +39,20 @@ interface AuthorRepositoryInterface
      * Return collection of records based on search
      *
      * @param AuthorDataTransferObject|null $search
+     * @param bool $paginate
      * @param array $columns
-     * @return ?LengthAwarePaginator|null
+     * @return LengthAwarePaginator|Collection
      */
-    public function getBySearch( ?AuthorDataTransferObject $search, array $columns = ['*']): ?LengthAwarePaginator;
+    public function getBySearch( ?AuthorDataTransferObject $search, bool $paginate = true, array $columns = ['*']);
+
     /**
      * Return upadted record if it exists
      *
      * @param int $id
-     * @param AuthorDataTransferObject $author
+     * @param AuthorDataTransferObject $authorDTO
      * @return Author|null
      */
-    public function update(int $id, AuthorDataTransferObject $author): ?Author;
+    public function update(int $id, AuthorDataTransferObject $authorDTO): ?Author;
     /**
      * Return record if it exists
      *
@@ -62,9 +64,9 @@ interface AuthorRepositoryInterface
      * Create new record
      *
      * @param AuthorDataTransferObject $author
-     * @return Author
+     * @return Author|null
      */
-    public function new(AuthorDataTransferObject $author): Author;
+    public function new(AuthorDataTransferObject $author): ?Author;
     /**
      * Delete record if it exists
      *

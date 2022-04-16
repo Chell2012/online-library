@@ -52,4 +52,4 @@
             <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Submit</button>
         </div>
     </div>
-@endsection
+@stop

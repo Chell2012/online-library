@@ -43,12 +43,18 @@ Route::middleware(['auth','verified'])->group(function (){
     /*
      * Resource routes
      */
-    Route::resource('book', BookController::class);
     Route::resource('author', AuthorController::class);
+    Route::resource('book', BookController::class);
     Route::resource('category', CategoryController::class);
     Route::resource('publisher', PublisherController::class);
     Route::resource('tag', TagController::class);
 
     Route::post('/author/approve', [AuthorController::class,'approve'])->name('author.approve');
+    Route::post('/book/approve', [BookController::class,'approve'])->name('book.approve');
+    Route::post('/category/approve', [CategoryController::class,'approve'])->name('category.approve');
+    Route::post('/publisher/approve', [PublisherController::class,'approve'])->name('publisher.approve');
+    Route::post('/tag/approve', [TagController::class,'approve'])->name('tag.approve');
+
+
 });
 

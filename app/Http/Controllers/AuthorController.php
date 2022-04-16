@@ -10,6 +10,7 @@ use App\Repositories\AuthorRepositoryInterface;
 use App\DTO\AuthorDataTransferObject;
 use App\Http\Requests\ApproveRequest;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -31,9 +32,10 @@ class AuthorController extends Controller
      * Display a listing of resources.
      *
      * @param AuthorSearchRequest|null $request
-     * @return Response
+     * @param bool $returnJson
+     * @return JsonResponse|Response
      */
-    public function index(AuthorSearchRequest $request): Response
+    public function index(AuthorSearchRequest $request, bool $returnJson = false)
     {
         $authorDTO = new AuthorDataTransferObject(
             $request->name,
@@ -48,8 +50,10 @@ class AuthorController extends Controller
                 ) :
                 [1,2]
         );
-        $authors = $this->authorRepository->getBySearch($authorDTO);
-        return response()->view('author.list',[
+        $authors = $this->authorRepository->getBySearch($authorDTO, $request->pagination===null ? true : $request->pagination);
+        return ($request->return_json)?
+            response()->json($authors) :
+            response()->view('author.list',[
             'author_class'=>Author::class,
             'user'=>$request->user(),
             'approved_status'=>require_once database_path("data/status_list.php"),
@@ -88,7 +92,9 @@ class AuthorController extends Controller
             ($request->death_date!=null)?Carbon::parse($request->death_date):null,
         );
         $author = $this->authorRepository->new($authorDTO);
-        return response()->redirectToRoute('author.show', ['author'=>$author->id])->with('success', 'Запись сохранена');
+        return ($author!=null) ?
+            response()->redirectToRoute('author.show', ['author'=>$author->id])->with('success', 'Запись сохранена') :
+            redirect()->back()->with('error','Проверьте введённые данные');
     }
 
     /**
@@ -108,12 +114,15 @@ class AuthorController extends Controller
      * Display the specified resource.
      *
      * @param Author $author
-     * @return Response
+     * @param bool $returnJson
+     * @return JsonResponse|Response
      */
-    public function show(Author $author): Response
+    public function show(Author $author, bool $returnJson = false)
     {
         $authorCard = $this->authorRepository->getById($author->id);
-        return response()->view('author.show',[
+        return ($returnJson)?
+            response()->json($authorCard) :
+            response()->view('author.show',[
             'author_class'=>Author::class,
             'user'=>Auth::user(),
             'approved_status'=>require_once database_path("data/status_list.php"),
@@ -125,6 +134,7 @@ class AuthorController extends Controller
     /**
      * Show form for a new record
      *
+     * @param Author $author
      * @return Response
      */
     public function edit(Author $author): Response
