@@ -34,7 +34,7 @@ class BookFilterRequest extends FormRequest
             'tag_id.*'=>'integer|exists:App\Models\Tag,id',
             'author_id'=>'array|nullable',
             'author_id.*'=>'integer|exists:App\Models\Author,id',
-            'isApproved'=>'bool|nullable',
+            'approved'=>'array|nullable',
             'forApproveOnly'=>'bool|nullable',
             'sortBy'=>'string|nullable'
         ];

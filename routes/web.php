@@ -55,6 +55,6 @@ Route::middleware(['auth','verified'])->group(function (){
     Route::post('/publisher/approve', [PublisherController::class,'approve'])->name('publisher.approve');
     Route::post('/tag/approve', [TagController::class,'approve'])->name('tag.approve');
 
-
+    Route::post('/book/loadfrom', [BookController::class,'loadfrom'])->name('book.loadfrom');
 });
 

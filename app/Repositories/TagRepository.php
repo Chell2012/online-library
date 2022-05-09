@@ -24,21 +24,21 @@ class TagRepository implements TagRepositoryInterface
      * Return collection of records
      *
      * @param array|mixed $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAll($columns = ['*']): ?Collection
+    public function getAll($columns = ['*']): ?LengthAwarePaginator
     {
-        return Tag::all($columns);
+        return Tag::all()->paginate($perPage = 15, $columns);
     }
     /**
      * Return collection of approved records
      *
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
     public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator
     {
-        return Tag::where('approved', '>', '0')->paginate(15)->paginate($perPage = 15, $columns);
+        return Tag::where('approved', '>', '0')->paginate($perPage = 15, $columns);
     }
 
     /**
@@ -57,7 +57,7 @@ class TagRepository implements TagRepositoryInterface
             $list = Tag::where('approved', '>', '0');
         }
         if ($search->getTitle()!=null){
-            $list = $list->where('title', $search->getTitle());
+            $list = $list->where('title', 'like', '%'.$search->getTitle().'%');
         }
         if ($search->getCategory()!=null){
             $list = $list->where('category_id', $search->getCategory());
@@ -105,25 +105,6 @@ class TagRepository implements TagRepositoryInterface
         ]);
     }
     /**
-     * Approve or deapprove published record
-     *
-     * @param int $approved
-     * @param int $id
-     * @return bool
-     */
-    public function approve(int $approved, int $id): bool
-    {
-        if ($id != null){
-            $model = $this->getById($id);
-            if ($model!=null){
-                $model->approved = $approved;
-                return $model->save();
-            }
-        }
-        return false;
-    }
-
-    /**
      * Update record if it exists
      *
      * @param int $id
@@ -144,5 +125,23 @@ class TagRepository implements TagRepositoryInterface
         }
         $record->save();
         return $record;
+    }
+     /**
+     * Approve or deapprove published record
+     *
+     * @param int $approved
+     * @param int $id
+     * @return bool
+     */
+    public function approve(int $approved, int $id): bool
+    {
+        if ($id != null){
+            $model = $this->getById($id);
+            if ($model!=null){
+                $model->approved = $approved;
+                return $model->save();
+            }
+        }
+        return false;
     }
 }

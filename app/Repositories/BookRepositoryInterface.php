@@ -14,6 +14,7 @@ use App\Models\BooksTags;
 use App\Models\Book;
 use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  *
@@ -25,30 +26,19 @@ interface BookRepositoryInterface
      * Return collection of records
      * 
      * @param array|mixed $columns
-     * @return Collection|null
+     * @return  LengthAwarePaginator|null
      */
-    public function getAll($columns = ['*']): ?Collection;
-    /**
-     * Return collection of records
-     * 
-     * @param array|mixed $columns
-     * @return Collection|null
-     */
-    public function getAllApproved($columns = ['*']): ?Collection;
+    public function getAll($columns = ['*']): ?LengthAwarePaginator;
+
     /**
      * Return collection of books after filter
      * 
      * @param FilterDataTransferObject $filter
-     * @return Collection|null
+     * @param bool $paginate
+     * @param array $columns
+     * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(FilterDataTransferObject $filter): ?Collection;
-    /**
-     * Return book with tags and authors
-     * 
-     * @param int $id
-     * @return array|null
-     */
-    public function getWithRelations(int $id): ?array;
+    public function getBySearch(FilterDataTransferObject $filter, bool $paginate = true, array $columns = ['*']);
     /**
      * Return record if it exists
      * 
@@ -95,7 +85,7 @@ interface BookRepositoryInterface
      * @param bool $fullNames true - return authors with 'author' db record
      * @return Collection
      */
-    public function getAuthorRelations(int $bookId, bool $fullNames = false): ?Collection;
+    public function getAuthorRelations(int $bookId): ?Collection;
     /**
      * Return Collection of book tags
      * 
@@ -103,7 +93,7 @@ interface BookRepositoryInterface
      * @param bool $fullTitle
      * @return Collection
      */
-    public function getTagRelations(int $bookId, bool $fullTitle = false): ?Collection;
+    public function getTagRelations(int $bookId): ?Collection;
     /**
      * Find or create book-author relation
      * 

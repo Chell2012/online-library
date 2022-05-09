@@ -15,15 +15,15 @@ namespace App\DTO;
  */
 class BookDataTransferObject
 {
-    private string $title;
-    private int $publisherId;
-    private ?int $year;
-    private ?string $isbn;
-    private int $categoryId;
-    private string $link;
-    private ?string $description;
-    private array $authorsIds;
-    private array $tagsIds;
+    private $title;
+    private $publisherId;
+    private $year;
+    private $isbn;
+    private $categoryId;
+    private $link;
+    private $description;
+    private $authorsIds;
+    private $tagsIds;
     
     /**
      * 
@@ -45,8 +45,8 @@ class BookDataTransferObject
             int $categoryId,
             string $link,
             ?string $description,
-            array $authorsIds,
-            array $tagsIds
+            ?array $authorsIds,
+            ?array $tagsIds
             )
     {
         $this->title = $title;
@@ -109,17 +109,17 @@ class BookDataTransferObject
     }
     /**
      * 
-     * @return array
+     * @return ?array
      */
-    public function getAuthorsIds(): array
+    public function getAuthorsIds(): ?array
     {
         return $this->authorsIds;
     }
     /**
      * 
-     * @return array
+     * @return ?array
      */
-    public function getTagsIds(): array
+    public function getTagsIds(): ?array
     {
         return $this->tagsIds;
     }

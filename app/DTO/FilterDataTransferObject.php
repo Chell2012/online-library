@@ -22,8 +22,7 @@ class FilterDataTransferObject
     private $categoryId;
     private $authorsIds;
     private $tagsIds;
-    private $isApproved;
-    private $forApproveOnly;
+    private $approved;
     private $sortBy;
 
     /**
@@ -35,8 +34,7 @@ class FilterDataTransferObject
      * @param int|null $categoryId
      * @param array|null $authorsIds
      * @param array|null $tagsIds
-     * @param bool|null $isApproved
-     * @param bool|null $forApproveOnly
+     * @param array|null $approved
      * @param string|null $sortBy
      */
     public function __construct(
@@ -48,8 +46,7 @@ class FilterDataTransferObject
         ?int $categoryId,
         ?array $authorsIds,
         ?array $tagsIds,
-        ?bool $isApproved,
-        ?bool $forApproveOnly,
+        ?array $approved,
         ?string $sortBy
     ){
         $this->title = $title;
@@ -59,13 +56,12 @@ class FilterDataTransferObject
         $this->categoryId = $categoryId;
         $this->authorsIds = $authorsIds;
         $this->tagsIds = $tagsIds;
-        $this->isApproved = $isApproved;
-        $this->forApproveOnly = $forApproveOnly;
+        $this->approved = $approved;
         $this->sortBy = $sortBy;
     }
     /**
      *
-     * @return int
+     * @return int|null
      */
     public function getPublisherId(): ?int
     {
@@ -73,7 +69,7 @@ class FilterDataTransferObject
     }
     /**
      *
-     * @return int
+     * @return int|null
      */
     public function getYear(): ?int
     {
@@ -81,7 +77,7 @@ class FilterDataTransferObject
     }
     /**
      *
-     * @return string
+     * @return string|null
      */
     public function getISBN(): ?string
     {
@@ -89,7 +85,7 @@ class FilterDataTransferObject
     }
     /**
      *
-     * @return int
+     * @return int|null
      */
     public function getCategoryId(): ?int
     {
@@ -97,7 +93,7 @@ class FilterDataTransferObject
     }
     /**
      *
-     * @return array
+     * @return array|null
      */
     public function getAuthorsIds(): ?array
     {
@@ -105,7 +101,7 @@ class FilterDataTransferObject
     }
     /**
      *
-     * @return array
+     * @return array|null
      */
     public function getTagsIds(): ?array
     {
@@ -113,7 +109,7 @@ class FilterDataTransferObject
     }
     /**
      *
-     * @return string
+     * @return string|null
      */
     public function getTitle(): ?string
     {
@@ -121,23 +117,15 @@ class FilterDataTransferObject
     }
     /**
      *
-     * @return string
+     * @return array|null
      */
-    public function getApproved(): ?bool
+    public function getApproved(): ?array
     {
-        return $this->isApproved;
+        return $this->approved;
     }
     /**
      *
-     * @return string
-     */
-    public function getforApproveOnly(): ?bool
-    {
-        return $this->forApproveOnly;
-    }
-    /**
-     *
-     * @return string
+     * @return string|null
      */
     public function getSortBy(): ?string
     {

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @property string $title
+ * @property array $approved
  * @property bool $pagination
  * @property bool $return_json
  */
@@ -30,6 +31,8 @@ class CategorySearchRequest extends FormRequest
     {
         return [
             'title'=>'nullable|string|max:255',
+            'approved'=>'array|nullable',
+            'approved.*'=>'int|nullable',
             'pagination'=>'nullable|boolean',
             'return_json'=>'nullable|boolean',
         ];

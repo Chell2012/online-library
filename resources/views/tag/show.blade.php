@@ -39,7 +39,7 @@
                                 <input name="id" type="hidden" class="form-control form-control-border" value={{ $tag->id }}>
                                 <select name="approved" class="form-control">
                                     @foreach($approved_status as $status => $status_name)
-                                        <option value="{{ $status }}">{{ $status_name }}</option>
+                                        <option value="{{ $status }}" {{ ($tag->approved == $status)?"selected":"" }}>{{ $status_name }}</option>
                                     @endforeach
                                 </select>
                             </div>

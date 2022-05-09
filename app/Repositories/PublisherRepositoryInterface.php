@@ -8,7 +8,9 @@
 
 namespace App\Repositories;
 
+use App\DTO\PublisherDataTransferObject;
 use App\Models\Publisher;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -20,16 +22,25 @@ interface PublisherRepositoryInterface {
      * Return collection of records
      * 
      * @param array|mixed $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAll($columns = ['*']): ?Collection;
+    public function getAll($columns = ['*']): ?LengthAwarePaginator;
     /**
      * Return collection of approved records
      * 
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Collection;
+    public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator;
+    /**
+     * Return collection of records based on search
+     *
+     * @param TagDataTransferObject|null $search
+     * @param bool $paginate
+     * @param array $columns
+     * @return LengthAwarePaginator|Collection
+     */
+    public function getBySearch(PublisherDataTransferObject $search = null, bool $paginate = true, array $columns = ['*']);
     /**
      * Return record if it exists
      * 
@@ -39,18 +50,18 @@ interface PublisherRepositoryInterface {
     public function getById(int $id): ?Publisher;
     /**
      * 
-     * @param string $title
-     * @return Publisher
+     * @param PublisherDataTransferObject $publisherDTO
+     * @return Publisher|null
      */
-    public function new(string $title): Publisher;
+    public function new(PublisherDataTransferObject $publisherDTO): ?Publisher;
      /**
      * Update record if it exists
      * 
      * @param int $id
-     * @param string $title
+     * @param PublisherDataTransferObject $publisherDTO
      * @return Publisher|null
      */
-    public function update(int $id, string $title): ?Publisher;
+    public function update(int $id, PublisherDataTransferObject $publisherDTO): ?Publisher;
     /**
      * Delete record if it exists
      * 

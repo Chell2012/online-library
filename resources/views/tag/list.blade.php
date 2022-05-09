@@ -97,7 +97,7 @@
         <div class="card-footer clearfix">
             <div class="row">
                 <div class="col-md-3">
-                    {{ $tags->links() }}
+                    {{ $tags->appends($_GET)->links() }}
                 </div>
             </div>
         </div>

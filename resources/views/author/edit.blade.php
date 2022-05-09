@@ -48,7 +48,7 @@
             </form>
         </div>
         <div class="card-footer">
-            <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Submit</button>
+            <button id="submit-filter" type="submit" class="btn btn-primary" form="search-form">Сохранить</button>
         </div>
     </div>
 @stop

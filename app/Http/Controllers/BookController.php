@@ -8,10 +8,11 @@ use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
 use App\Http\Requests\ApproveRequest;
 use App\Http\Requests\BookFilterRequest;
+use App\Http\Requests\LoadFromRequest;
 use App\Models\Book;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class BookController extends Controller
 {
@@ -22,41 +23,14 @@ class BookController extends Controller
         $this->bookService=$bookService;
         $this->authorizeResource(Book::class);
     }
-    /**
-     * Add filter to resource list for policy action
-     *
-     * @return array
-     */
-    protected function resourceAbilityMap()
-    {
-        return [
-            'index' => 'viewAny',
-            'show' => 'view',
-            'store' => 'create',
-            'create'=> 'create',
-            'edit' => 'update',
-            'update' => 'update',
-            'destroy' => 'delete',
-            'approve' => 'approve'
-        ];
-    }
-    /**
-     * Add filter to actions without model dependency for policy action
-     *
-     * @return array
-     */
-    protected function resourceMethodsWithoutModels(): array
-    {
-        return ['index', 'store', 'approve', 'create'];
-    }
 
     /**
      * Display a listing of the resource.
      *
      * @param BookFilterRequest $request
-     * @return View
+     * @return Response
      */
-    public function index(BookFilterRequest $request): View
+    public function index(BookFilterRequest $request): Response
     {
         $booksArray = $this->bookService->filter(new FilterDataTransferObject(
             $request->title,
@@ -66,13 +40,21 @@ class BookController extends Controller
             $request->category_id,
             $request->author_id,
             $request->tag_id,
-            $request->isApproved,
-            $request->forApproveOnly,
+            ($request->user()->can('view-not-approved-'.Book::class)) ?
+                (($request->approved!=null) ?
+                    array_map(function($value) { return (int)$value; }, $request->approved) :
+                    null
+                ) :
+                [1,2],
             $request->sortBy
         ));
-        return view('book.filter', [
+        return response()->view('book.filter', [
+            'book_class'=>Book::class,
+            'user'=>$request->user(),
+            'approved_status'=>require_once database_path("data/status_list.php"),
             'pageTitle' => __('Библиотека'),
-            'books'=>$booksArray
+            'books'=>$booksArray,
+            'request'=>$request
         ]);
     }
 
@@ -80,34 +62,38 @@ class BookController extends Controller
      * Store a newly created resource in storage.
      *
      * @param BookStoreRequest $request
-     * @return RedirectResponse|View
+     * @return RedirectResponse
      */
     public function store(?BookStoreRequest $request)
     {
         $bookDTO = new BookDataTransferObject(
-                $request->title,
-                $request->publisher_id,
-                $request->year,
-                $request->isbn,
-                $request->category_id,
-                $request->link,
-                $request->description,
-                $request->author_id,
-                $request->tag_id
-                );
-        $book = $this->bookService->new($bookDTO);
-        if ($book){
-            return redirect()->route('book.show',['id'=>$book->id]);
-        }
+            $request->title,
+            $request->publisher_id,
+            $request->year,
+            $request->isbn,
+            $request->category_id,
+            $request->link,
+            $request->description,
+            $request->author_id,
+            $request->tag_id
+        );
+        $book = $this->bookService->new($bookDTO, Auth::id());
+        return ($book!=null) ?
+            response()->redirectToRoute('book.show',['id'=>$book->id]) :
+            redirect()->back()->with('error','Проверьте введённые данные');
     }
 
     /**
+     * Show form for a new record
+     * 
      * @return Response
      */
     public function create()
     {
         return response()->view('book.create', [
-            'pageTitle' => __('Новая книга')
+            'pageTitle' => __('Новая книга'),
+            'book_class'=>Book::class,
+            'user'=>Auth::user(),
         ]);
     }
     /**
@@ -118,10 +104,26 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        return response()->view(
-            'book.show',
-            ['book'=>$this->bookService->getWithRelations($book->id)]
+        return response()->view('book.show',[
+            'book'=>$book,
+            'book_class'=>Book::class,
+            'user'=>Auth::user(),
+            'approved_status'=>require_once database_path("data/status_list.php"),
+            'pageTitle' => __($book->title)
+            ]
         );
+    }
+    /**
+     * Show form for a new record
+     * 
+     * @return Response
+     */
+    public function edit(Book $book)
+    {
+        return response()->view('book.edit', [
+            'book' => $book,
+            'pageTitle' => __($book->title)
+        ]);
     }
     /**
      * Update the specified resource in storage.
@@ -132,19 +134,21 @@ class BookController extends Controller
      */
     public function update(Book $book, BookStoreRequest $request)
     {
-
-        $bookArray = $this->bookService->update(new BookDataTransferObject(
-                $request->title,
-                $request->publisher_id,
-                $request->year,
-                $request->isbn,
-                $request->category_id,
-                $request->link,
-                $request->description,
-                $request->author_id,
-                $request->tag_id
-                ), $book->id);
-        return response()->json($bookArray);
+        $bookDTO = new BookDataTransferObject(
+            $request->title,
+            $request->publisher_id,
+            $request->year,
+            $request->isbn,
+            $request->category_id,
+            $request->link,
+            $request->description,
+            $request->author_id,
+            $request->tag_id
+        );
+        $bookUpdate = $this->bookService->update($bookDTO, $book->id);
+        return ($bookUpdate)?
+            response()->redirectToRoute('book.show', ['book' => $bookUpdate->id])->with('success', 'Запись обновлена'):
+            redirect()->back()->with('error', 'Что-то пошло не так');
     }
 
     /**
@@ -155,10 +159,9 @@ class BookController extends Controller
      */
     public function destroy(Book $book): RedirectResponse
     {
-        if($this->bookService->delete($book->id)){
-            return redirect()->route('book.index')->with('success', 'Книга успешно удалена');
-        }
-        return redirect()->route('book.index')->with('error', 'Не удалось удалить книгу');
+        return ($this->bookService->delete($book->id)) ?
+            response()->redirectToRoute('book.index')->with('success', 'Книга успешно удалена') :
+            response()->redirectToRoute('book.index')->with('error', 'Не удалось удалить книгу');
     }
 
     /**
@@ -169,9 +172,19 @@ class BookController extends Controller
      */
     public function approve(ApproveRequest $request)
     {
-        if($this->bookService->approve($request->approved, $request->id)){
-            return redirect()->back()->with('success', 'Книга опубликована');
-        }
-        return redirect()->back()->with('error', 'Книга не опубликована');
+        return ($this->bookService->approve($request->approved, $request->id)) ?
+            redirect()->back()->with('success', 'Книга опубликована') :
+            redirect()->back()->with('error', 'Книга не опубликована');
+    }
+    /**
+     * Load from yandex api
+     * 
+     * @param 
+     * @return RedirectResponse
+     */
+    public function loadfrom(LoadFromRequest $request){
+        return ($this->bookService->yandexBooksLoader($request->path, $request->user()->id)) ?
+            redirect()->back()->with('success', 'Книги добавлены') :
+            redirect()->back()->with('error', 'Что-то пошло не так');
     }
 }

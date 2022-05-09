@@ -15,9 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * Repository of book table
@@ -30,31 +28,28 @@ class BookRepository implements BookRepositoryInterface
      * Return collection of records
      * 
      * @param array|mixed $columns
-     * @return Collection|null
+     * @return  LengthAwarePaginator|null
      */
-    public function getAllApproved($columns = ['*']): ?Collection
+    public function getAll($columns = ['*']): ?LengthAwarePaginator
     {
-        return Book::all($columns)->where('approved', '>', '0');;
+        return Book::all()->paginate($perPage = 15, $columns);
     }
-    /**
-     * Return collection of records
-     * 
-     * @param array|mixed $columns
-     * @return Collection|null
-     */
-    public function getAll($columns = ['*']): ?Collection
-    {
-        return Book::all($columns);
-    }
+
     /**
      * Return collection of books after filter
      * 
      * @param FilterDataTransferObject $filter
-     * @return Collection|null
+     * @param bool $paginate
+     * @param array $columns
+     * @return Collection|LengthAwarePaginator
      */
-    public function getByFilter(FilterDataTransferObject $filter): ?Collection
+    public function getBySearch(FilterDataTransferObject $filter, bool $paginate = true, array $columns = ['*'])
     {
-        $query = Book::query();
+        if ($filter->getApproved()!=null){
+            $query = Book::whereIn('approved', $filter->getApproved());
+        } else {
+            $query = Book::where('approved', '>', '0');
+        }
         if($filter->getAuthorsIds()!=null){
             foreach($filter->getAuthorsIds() as $authorId){
                 $query->whereHas('authors',function(Builder $authorQuery) use ($authorId){
@@ -79,40 +74,30 @@ class BookRepository implements BookRepositoryInterface
             $query->where('publisher_id', '=', $filter->getPublisherId());
         }
         if($filter->getTitle()!=null){
-            $query->where('title', '=', $filter->getTitle());
+            $query->where('title', 'like', '%'.$filter->getTitle().'%');
         }
         if($filter->getYear()!=null){
             $query->where('year', '=', $filter->getYear());
         }
-        return $query->with('tags')->with('authors')->get();
+        if($filter->getSortBy()!=null){
+            $query->orderBy($filter->getSortBy);
+        }
+        return ($paginate)?
+            $query->with('tags')->with('authors')->paginate($perPage = 15, $columns):
+            $query->with('tags')->with('authors')->get($columns);
     }
+
     /**
      * Return record if it exists
      * 
      * @param int $id
-     * @return array|null
+     * @return Book|null
      */
     public function getById(int $id): ?Book
     {
         return Book::query()->find($id);
     }
-    /**
-     * Return book with tags and authors
-     * 
-     * @param int $id
-     * @return array|null
-     */
-    public function getWithRelations(int $id): ?array
-    {
-        $book = $this->getById($id);
-        $authors = $this->getAuthorRelations($id, true);
-        $tags = $this->getTagRelations($id, true);
-        return isset($book)?[
-            'book'=>$book,
-            'authors'=>$authors,
-            'tags'=>$tags
-        ]:null;
-    }
+
     /**
      * Create new record
      * 
@@ -122,17 +107,21 @@ class BookRepository implements BookRepositoryInterface
      */
     public function new(int $userId, BookDataTransferObject $BookDTO): ?Book
     {
+        if ($BookDTO->getTitle()==null){
+            return null;
+        }
         return Book::query()->create([
             'title'=>$BookDTO->getTitle(),
-            'publisher_id'=>$BookDTO->getPublisherId(),
+            'publisher_id'=>($BookDTO->getPublisherId())?($BookDTO->getPublisherId()):0,
             'year'=>$BookDTO->getYear(),
             'isbn'=>$BookDTO->getISBN(),
-            'category_id'=>$BookDTO->getCategoryId(),
+            'category_id'=>($BookDTO->getCategoryId())?($BookDTO->getCategoryId()):0,
             'user_id'=>$userId,
             'link'=>$BookDTO->getLink(),
             'description'=>$BookDTO->getDescription()
         ]);
     }
+
     /**
      * Approve or deapprove published record
      * 
@@ -151,6 +140,7 @@ class BookRepository implements BookRepositoryInterface
         }
         return false; 
     }
+
     /**
      * Update record if it exists
      * 
@@ -161,21 +151,30 @@ class BookRepository implements BookRepositoryInterface
      */
     public function update(int $id, int $userId, BookDataTransferObject $BookDTO): ?Book
     {
-        $book = Book::query()->find($id);
+        $book = $this->getById($id);
         if (!isset($book)){
             return null;
         }
-        $book->title = $BookDTO->getTitle();
-        $book->publisher_id = $BookDTO->getPublisherId();
+        if ($BookDTO->getTitle()!=null){
+            $book->title = $BookDTO->getTitle();
+        }
+        if ($BookDTO->getPublisherId()!=null){
+            $book->publisher_id = $BookDTO->getPublisherId();
+        }
         $book->year = $BookDTO->getYear();
         $book->isbn = $BookDTO->getISBN();
-        $book->category_id = $BookDTO->getCategoryId();
+        if ($BookDTO->getCategoryId()!=null){
+            $book->category_id = $BookDTO->getCategoryId();
+        }
         $book->user_id = $userId;
-        $book->link = $BookDTO->getLink();
+        if ($BookDTO->getLink()!=null){
+            $book->link = $BookDTO->getLink();
+        }
         $book->description = $BookDTO->getDescription();
         $book->save();
         return $book;
     }
+
     /**
      * Delete book with that id
      * 
@@ -184,27 +183,24 @@ class BookRepository implements BookRepositoryInterface
      */
     public function delete(int $id): bool
     {
-        $removingBook = $this->getById($id);
-        if ($removingBook!=null){
-            return $removingBook->delete();
+        if ($id!=null){
+            return $this->getById($id)->delete();
         }
         return false;
     }
+
     /**
      * Return Collection of book authors
      * 
      * @param int $bookId
-     * @param bool $fullNames true - return authors with 'author' db record
+     * @param bool $fullNames
      * @return Collection
      */
-    public function getAuthorRelations(int $bookId, bool $fullNames = false): ?Collection
+    public function getAuthorRelations(int $bookId): ?Collection
     {
-        if ($fullNames) {
-            return BooksAuthors::query()->where('book_id', $bookId)->with('author')->get();
-            
-        }
-        return BooksAuthors::query()->where('book_id', $bookId)->get();
+        return BooksAuthors::query()->where('book_id', $bookId)->with('author')->get();
     }
+
     /**
      * Return Collection of book tags
      * 
@@ -212,13 +208,11 @@ class BookRepository implements BookRepositoryInterface
      * @param bool $fullTitle
      * @return Collection
      */
-    public function getTagRelations(int $bookId, bool $fullTitle = false): ?Collection
+    public function getTagRelations(int $bookId): ?Collection
     {
-        if($fullTitle){
-            return BooksTags::query()->where('book_id', $bookId)->with('tag')->get();
-        }
-        return BooksTags::query()->where('book_id', $bookId)->get();
+        return BooksTags::query()->where('book_id', $bookId)->with('tag')->get();
     }
+
     /**
      * Find or create book-author relation
      * 
@@ -233,6 +227,7 @@ class BookRepository implements BookRepositoryInterface
             'author_id'=>$authorId
         ]);
     }
+
     /**
      * Find or create book-tag relation
      * 
@@ -247,6 +242,7 @@ class BookRepository implements BookRepositoryInterface
             'tag_id'=>$tagId
         ]);
     }
+
     /**
      * Delete author from book's authors list
      * 
@@ -258,6 +254,7 @@ class BookRepository implements BookRepositoryInterface
     {
         return BooksAuthors::query()->where('book_id', $bookId)->where('author_id', $authorId)->delete();
     }
+
     /**
      * Delete tag from book's tags list
      * 
@@ -269,6 +266,7 @@ class BookRepository implements BookRepositoryInterface
     {
         return BooksTags::query()->where('book_id', $bookId)->where('tag_id', $tagId)->delete();
     }
+
     /**
      * Delete authors from book's authors list
      * 
@@ -279,6 +277,7 @@ class BookRepository implements BookRepositoryInterface
     {
         return BooksAuthors::query()->where('book_id', $bookId)->delete();
     }
+
     /**
      * Delete all tags from book's tags list
      * 

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -29,7 +30,12 @@ class TagsUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'title'=>'string|unique:App\Models\Tag|max:255',
+            'title'=>[
+                'required',
+                'string',
+                Rule::unique('App\Models\Tag', 'title')->ignore($this->tag),
+                'max:255'
+            ],
             'category_id' => 'nullable|integer|exists:App\Models\Category,id'
         ];
     }

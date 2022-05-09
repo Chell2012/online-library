@@ -8,7 +8,9 @@
 
 namespace App\Repositories;
 
+use App\DTO\PublisherDataTransferObject;
 use App\Models\Publisher;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -22,21 +24,41 @@ class PublisherRepository implements PublisherRepositoryInterface
      * Return collection of records
      * 
      * @param type $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAll($columns = ['*']): ?Collection 
+    public function getAll($columns = ['*']): ?LengthAwarePaginator
     {
-        return Publisher::all($columns);
+        return Publisher::all()->paginate($perPage = 15, $columns);
     }
     /**
      * Return collection of approved records
      * 
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Collection
+    public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator
     {
-        return Publisher::all($columns)->where('approved', '>', '0');
+        return Publisher::where('approved', '>', '0')->paginate($perPage = 15, $columns);
+    }
+    /**
+     * Return collection of records based on search
+     *
+     * @param CategoryDataTransferObject|null $search
+     * @param bool $paginate
+     * @param array $columns
+     * @return LengthAwarePaginator|Collection
+     */
+    public function getBySearch(PublisherDataTransferObject $search = null, bool $paginate = true, array $columns = ['*'])
+    {
+        if ($search->getApproved()!=null){
+            $list = Publisher::whereIn('approved', $search->getApproved());
+        } else {
+            $list = Publisher::where('approved', '>', '0');
+        }
+        if ($search->getTitle()!=null){
+            $list = $list->where('title','like', '%'.$search->getTitle().'%');
+        }
+        return ($paginate)? $list->paginate($perPage = 15, $columns) : $list->get();
     }
     /**
      * Return record if it exists
@@ -67,9 +89,12 @@ class PublisherRepository implements PublisherRepositoryInterface
      * @param string $title
      * @return Publisher
      */
-    public function new(string $title): Publisher
+    public function new(PublisherDataTransferObject $publisherDTO): ?Publisher
     {
-        return Publisher::query()->create(['title'=>$title]);
+        if ($publisherDTO->getTitle()==null){
+            return null;
+        }
+        return Publisher::query()->create(['title'=>$publisherDTO->getTitle()]);
     }
     /**
      * Update record if it exists
@@ -78,12 +103,17 @@ class PublisherRepository implements PublisherRepositoryInterface
      * @param string $title
      * @return Publisher|null
      */
-    public function update(int $id, string $title): ?Publisher
+    public function update(int $id, PublisherDataTransferObject $publisherDTO): ?Publisher
     {
-        $publisher = Publisher::query()->find($id);
-        $publisher->title = $title;
-        $publisher->save();
-        return $publisher;
+        $record = $this->getById($id);
+        if ($record === null){
+            return null;
+        }
+        if ($publisherDTO->getTitle()!=null){
+            $record->title = $publisherDTO->getTitle();
+        }
+        $record->save();
+        return $record;
     }
     /**
      * Approve or deapprove published record

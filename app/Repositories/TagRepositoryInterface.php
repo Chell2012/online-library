@@ -11,7 +11,6 @@ namespace App\Repositories;
 use App\DTO\TagDataTransferObject;
 use App\Models\Tag;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -24,17 +23,16 @@ interface TagRepositoryInterface
      * Return collection of records
      *
      * @param array|mixed $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAll($columns = ['*']): ?Collection;
+    public function getAll($columns = ['*']): ?LengthAwarePaginator;
     /**
      * Return collection of approved records
      *
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
     public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator;
-
     /**
      * Return collection of records based on search
      *
@@ -51,7 +49,6 @@ interface TagRepositoryInterface
      * @return Tag|null
      */
     public function getById(int $id): ?Tag;
-
     /**
      * Create new record
      *
@@ -59,7 +56,6 @@ interface TagRepositoryInterface
      * @return Tag
      */
     public function new(TagDataTransferObject $tagDTO): ?Tag;
-
     /**
      * Update record if it exists
      *

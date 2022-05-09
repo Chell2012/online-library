@@ -23,22 +23,22 @@ interface CategoryRepositoryInterface
      * Return collection of records
      *
      * @param mixed|array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAll($columns = ['*']): ?Collection;
+    public function getAll($columns = ['*']): ?LengthAwarePaginator;
     /**
      * Return collection of approved records
      *
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Collection;
+    public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator;
 
     /**
      * Return collection of records based on search
      *
      * @param CategoryDataTransferObject|null $search
-     * @param bool $paginate
+     * @param bool $paginate 
      * @param array $columns
      * @return LengthAwarePaginator|Collection
      */
@@ -54,9 +54,9 @@ interface CategoryRepositoryInterface
      * Create new record
      *
      * @param string $title
-     * @return Category
+     * @return Category|null
      */
-    public function new(string $title): Category;
+    public function new(CategoryDataTransferObject $categoryDTO): ?Category;
     /**
      * Update record if it exists
      *
@@ -64,7 +64,7 @@ interface CategoryRepositoryInterface
      * @param string $title
      * @return Category|null
      */
-    public function update(int $id, string $title): ?Category;
+    public function update(int $id, CategoryDataTransferObject $categoryDTO): ?Category;
     /**
      * Delete record if it exists
      *

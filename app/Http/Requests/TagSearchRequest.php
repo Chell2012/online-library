@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * @property string $title
  * @property int $category_id
- * @property int $approved
+ * @property array $approved
  * @property bool $pagination
  * @property bool $return_json
  */

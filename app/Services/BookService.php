@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Http;
 
 /**
  * Description of BookService
@@ -32,49 +34,43 @@ class BookService
         $this->bookRepository = $bookRepository;
     }
     /**
-     * Return collection of records
-     *
-     * @param bool $showOnlyApproved
-     * @return Collection|null
-     */
-    public function list(bool $showOnlyApproved = false): ?Collection
-    {
-        return $showOnlyApproved ? $this->bookRepository->getAllApproved() : $this->bookRepository->getAll();
-    }
-    /**
      * Return book with tags and authors
      *
      * @param int $id
-     * @return array|null
+     * @return Book|null
      */
-    public function getWithRelations(int $id): ?array
+    public function getById(int $id): ?Book
     {
-        return $this->bookRepository->getWithRelations($id);
+        return $this->bookRepository->getById($id);
     }
     /**
      * Return collection of books after filter
      *
      * @param FilterDataTransferObject $filter
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function filter(FilterDataTransferObject $filter): ?Collection
+    public function filter(FilterDataTransferObject $filter, bool $paginate = true, array $columns = ['*']): ?LengthAwarePaginator
     {
-        return $this->bookRepository->getByFilter($filter);
+        return $this->bookRepository->getBySearch($filter, $paginate, $columns);
     }
     /**
      * Create new book and relations
      *
      * @param BookDataTransferObject $bookDTO
-     * @return Book
+     * @return Book|null
      */
-    public function new(BookDataTransferObject $bookDTO): ?Book
+    public function new(BookDataTransferObject $bookDTO, int $userID): ?Book
     {
-        $book = $this->bookRepository->new(Auth::id(), $bookDTO);
+        $book = $this->bookRepository->new($userID, $bookDTO);
         if (!isset($book)){
             return null;
         }
-//        $authors = $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
-//        $tags = $this->setTags($book->id, $bookDTO->getTagsIds());
+        if ($bookDTO->getAuthorsIds()!=null){
+            $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
+        }
+        if ($bookDTO->getTagsIds()!=null){
+            $this->setTags($book->id, $bookDTO->getTagsIds());
+        }
         return  $book;
     }
     /**
@@ -82,21 +78,21 @@ class BookService
      *
      * @param BookDataTransferObject $bookDTO
      * @param int $id
-     * @return array|null
+     * @return Book|null
      */
-    public function update(BookDataTransferObject $bookDTO, int $id): ?array
+    public function update(BookDataTransferObject $bookDTO, int $id): ?Book
     {
         $book = $this->bookRepository->update($id, Auth::id(), $bookDTO);
         if (!isset($book)){
             return null;
         }
-        $authors = $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
-        $tags = $this->setTags($book->id, $bookDTO->getTagsIds());
-        return  [
-        'book'=>$book,
-        'authors'=>$authors,
-        'tags'=>$tags
-        ];
+        if ($bookDTO->getAuthorsIds()!=null){
+            $this->setAuthors($book->id, $bookDTO->getAuthorsIds());
+        }
+        if ($bookDTO->getTagsIds()!=null){
+            $this->setTags($book->id, $bookDTO->getTagsIds());
+        }
+        return  $book;
     }
     /**
      *
@@ -154,5 +150,47 @@ class BookService
     public function approve(int $approved, int $id): bool
     {
         return $this->bookRepository->approve($approved, $id);
+    }
+    /**
+     * Add books from yandex api
+     * 
+     * @param string $path
+     * @param int $userID
+     * @return bool
+     */
+    public function yandexBooksLoader(string $path, int $userID) :bool
+    {
+        $offset = 0;
+        do {
+            $response = Http::get('https://cloud-api.yandex.net/v1/disk/public/resources', [
+                'public_key' => $path,
+                'limit' => 20,
+                'offset'=> $offset
+            ]);
+            $total = $response["_embedded"]["total"];
+            $offset = $response["_embedded"]["offset"];
+            $items = $response["_embedded"]["items"];
+            foreach ($items as $id => $item){
+                if ($item["type"] == "file"){
+                    $bookDTO = new BookDataTransferObject(
+                        $item["name"],
+                        1,
+                        null,
+                        null,
+                        1,
+                        $response["public_url"].$item["path"],
+                        null,
+                        null,
+                        null
+                    );
+                    if ($this->new($bookDTO, $userID) == null){
+                        return false;
+                    }
+                    //TODO: обработать ошибку на случай, если не добавилось надо бы
+                }
+            }
+            $offset+=20;
+        } while ($offset<$total);
+        return true;
     }
 }

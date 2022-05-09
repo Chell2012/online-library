@@ -25,7 +25,7 @@
             </form>
         </div>
         <div class="card-footer">
-            <button id="submit-filter" type="submit" class="btn btn-primary" form="create-form">Submit</button>
+            <button id="submit-filter" type="submit" class="btn btn-primary" form="create-form">Сохранить</button>
         </div>
     </div>
 @stop

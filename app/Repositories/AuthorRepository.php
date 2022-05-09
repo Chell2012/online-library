@@ -63,7 +63,7 @@ class AuthorRepository implements AuthorRepositoryInterface
             $list = $list->where('middle_name', $search->getMiddleName());
         }
         if ($search->getSurame()!=null){
-            $list = $list->where('surname', $search->getSurame());
+            $list = $list->where('surname', 'like', '%'.$search->getSurame().'%');
         }
         if ($search->getBirthDate()!=null){
             $list = $list->where('birth_date', $search->getBirthDate());

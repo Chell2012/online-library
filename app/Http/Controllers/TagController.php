@@ -8,6 +8,7 @@ use App\Http\Requests\TagSearchRequest;
 use App\Models\Tag;
 use App\Http\Requests\TagsStoreRequest;
 use App\Http\Requests\TagsUpdateRequest;
+use App\Models\Category;
 use App\Repositories\TagRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -78,7 +79,6 @@ class TagController extends Controller
      */
     public function store(TagsStoreRequest $request): RedirectResponse
     {
-        var_dump('sd');
         $tagDTO = new TagDataTransferObject(
             $request->title,
             $request->category_id
@@ -117,10 +117,12 @@ class TagController extends Controller
     public function edit(Tag $tag): Response
     {
         return response()->view('tag.edit', [
+            'category'=>$tag->category()->first(),
             'tag'=>$tag,
             'pageTitle' => __('Редактирование '.$tag->title)
         ]);
     }
+    
     /**
      * Update the specified resource in storage.
      *

@@ -13,20 +13,22 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Тема</label>
-                            <input name="title" type="text" class="form-control form-control-border" placeholder="Тема" value={{ old('title') }}>
+                            <input name="title" type="text" class="form-control form-control-border" placeholder="Тема" value="{{ $tag->title }}">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Категория</label>
-                            <select name="category_id" class="form-control category-selection"></select>
+                            <select name="category_id" class="form-control category-selection">
+                                <option value='{{ $tag->category_id }}' selected>{{ $category->title }}</option>
+                            </select>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
         <div class="card-footer">
-            <button id="submit-filter" type="submit" class="btn btn-primary" form="update-form">Submit</button>
+            <button id="submit-filter" type="submit" class="btn btn-primary" form="update-form">Сохранить</button>
         </div>
     </div>
 @stop
@@ -55,7 +57,7 @@
                             results: $.map(data, function (item) {
                                 return {
                                     text: item.title,
-                                    id: item.id
+                                    id: item.id,
                                 }
                             })
                         };

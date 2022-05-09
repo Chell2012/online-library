@@ -24,21 +24,22 @@ class CategoryRepository implements CategoryRepositoryInterface
      * Return collection of records
      *
      * @param array|mixed $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAll($columns = ['*']): ?Collection
+    public function getAll($columns = ['*']): ?LengthAwarePaginator
     {
-        return Category::all($columns);
+        return Category::all()->paginate($perPage = 15, $columns);
     }
+
     /**
      * Return collection of approved records
      *
      * @param array $columns
-     * @return Collection|null
+     * @return LengthAwarePaginator|null
      */
-    public function getAllApproved(array $columns = ['*']): ?Collection
+    public function getAllApproved(array $columns = ['*']): ?LengthAwarePaginator
     {
-        return Category::all($columns)->where('approved', '>', '0');
+        return Category::where('approved', '>', '0')->paginate($perPage = 15, $columns);
     }
 
     /**
@@ -52,7 +53,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     public function getBySearch(CategoryDataTransferObject $search = null, bool $paginate = true, array $columns = ['*'])
     {
         if ($search->getApproved()!=null){
-            $list = Category::whereIn('approved', $search->getApprove());
+            $list = Category::whereIn('approved', $search->getApproved());
         } else {
             $list = Category::where('approved', '>', '0');
         }
@@ -61,6 +62,7 @@ class CategoryRepository implements CategoryRepositoryInterface
         }
         return ($paginate)? $list->paginate($perPage = 15, $columns) : $list->get();
     }
+
     /**
      * Return record if it exists
      *
@@ -71,6 +73,7 @@ class CategoryRepository implements CategoryRepositoryInterface
     {
         return Category::query()->find($id);
     }
+
     /**
      * Delete record if it exists
      *
@@ -80,20 +83,25 @@ class CategoryRepository implements CategoryRepositoryInterface
     public function delete(int $id): bool
     {
         if ($id!=null){
-            return Category::query()->find($id)->delete();
+            return $this->getById($id)->delete();
         }
         return false;
     }
+
     /**
      * Create new record
      *
      * @param string $title
-     * @return Category
+     * @return Category|null
      */
-    public function new(string $title): Category
+    public function new(CategoryDataTransferObject $categoryDTO): ?Category
     {
-        return Category::query()->create(['title'=>$title]);
+        if ($categoryDTO->getTitle()==null){
+            return null;
+        }
+        return Category::query()->create(['title'=>$categoryDTO->getTitle()]);
     }
+
     /**
      * Update record if it exists
      *
@@ -101,13 +109,19 @@ class CategoryRepository implements CategoryRepositoryInterface
      * @param string $title
      * @return Category|null
      */
-    public function update(int $id, string $title): ?Category
+    public function update(int $id, CategoryDataTransferObject $categoryDTO): ?Category
     {
-        $category = Category::query()->find($id);
-        $category->title = $title;
-        $category->save();
-        return $category;
+        $record = $this->getById($id);
+        if ($record === null){
+            return null;
+        }
+        if ($categoryDTO->getTitle()!=null){
+            $record->title = $categoryDTO->getTitle();
+        }
+        $record->save();
+        return $record;
     }
+    
     /**
      * Approve or deapprove published record
      *

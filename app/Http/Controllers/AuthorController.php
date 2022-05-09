@@ -128,7 +128,7 @@ class AuthorController extends Controller
             'approved_status'=>require_once database_path("data/status_list.php"),
             'author'=>$authorCard,
             'pageTitle' => __($authorCard->surname.' '.$authorCard->name.' '.$authorCard->middle_name)
-            ]);
+        ]);
     }
 
     /**
