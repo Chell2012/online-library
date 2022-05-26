@@ -27,15 +27,6 @@ class AuthServiceProvider extends ServiceProvider
     {   //register policies and permissions
         $this->defineAdmin();
         $this->registerPolicies();
-        
-        //Я не помню было ли это тут или нет. IDE думает что тут ошибка, но вроде бы оно тут должно быть, так что не трогаю пока
-        if (! $this->app->routesAreCached()) {
-            Passport::routes();
-        }
-        
-        Passport::tokensExpireIn(now()->addDays(15));
-        Passport::refreshTokensExpireIn(now()->addDays(30));
-        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
     }
     /**
      * Grant all privileges for admin
