@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class BookThumbnail extends Migration
+class BookSource extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class BookThumbnail extends Migration
     public function up()
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->string('thumbnail')->nullable();
+            $table->string('source');
         });
     }
 
@@ -26,7 +26,7 @@ class BookThumbnail extends Migration
     public function down()
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->dropColumn('thumbnail');
+            $table->dropColumn('source');
         });
     }
 }

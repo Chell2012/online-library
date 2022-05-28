@@ -16,6 +16,10 @@ use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+
+use function PHPUnit\Framework\isEmpty;
 
 /**
  * Repository of book table
@@ -99,6 +103,17 @@ class BookRepository implements BookRepositoryInterface
     }
 
     /**
+     * Get last loading date from specific source
+     * @param string $source
+     * @return Carbon|null
+     */
+    public function getLastDateFrom(string $source): ?Carbon
+    {
+        $lastDate = Book::all('created_at','source')->where('source', $source)->max('created_at');
+        return $lastDate;
+    }
+
+    /**
      * Create new record
      * 
      * @param int $userId
@@ -118,7 +133,8 @@ class BookRepository implements BookRepositoryInterface
             'category_id'=>($BookDTO->getCategoryId())?($BookDTO->getCategoryId()):0,
             'user_id'=>$userId,
             'link'=>$BookDTO->getLink(),
-            'description'=>$BookDTO->getDescription()
+            'description'=>$BookDTO->getDescription(),
+            'source'=>$BookDTO->getSource()
         ]);
     }
 
@@ -171,6 +187,9 @@ class BookRepository implements BookRepositoryInterface
             $book->link = $BookDTO->getLink();
         }
         $book->description = $BookDTO->getDescription();
+        if ($BookDTO->getSource()!=null){
+            $book->source = $BookDTO->getSource();
+        }
         $book->save();
         return $book;
     }

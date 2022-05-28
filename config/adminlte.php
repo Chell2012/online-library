@@ -67,11 +67,11 @@ return [
     */
 
     'usermenu_enabled' => true,
-    'usermenu_header' => false,
+    'usermenu_header' => true,
     'usermenu_header_class' => 'bg-primary',
     'usermenu_image' => false,
     'usermenu_desc' => false,
-    'usermenu_profile_url' => false,
+    'usermenu_profile_url' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -249,13 +249,17 @@ return [
         //     'can'  => 'manage-blog',
         // ],
         [
-            'text'        => 'Библиотека',
-            'url'         => 'book',
+            'text' => 'Библиотека',
+            'url'  => 'book',
+            'icon' => 'fas fa-fw fa-book',
             //'icon'        => 'far fa-fw fa-file',
             // 'label'       => 4,
             //'label_color' => 'success',
         ],
-        ['header' => 'Управление ресурсами'],
+        [
+            'can'    => 'update-App\Models\Author',
+            'header' => 'Управление ресурсами'
+        ],
         [
             'can'  => 'update-App\Models\Author',
             'text' => 'Авторы',
@@ -278,6 +282,12 @@ return [
             'can'  => 'update-App\Models\Tag',
             'text' => 'Темы',
             'url'  => 'tag',
+            // 'icon' => 'fas fa-fw fa-lock',
+        ],
+        [
+            'can'  => 'update-App\Models\User',
+            'text' => 'Пользователи',
+            'url'  => 'user',
             // 'icon' => 'fas fa-fw fa-lock',
         ],
         // [

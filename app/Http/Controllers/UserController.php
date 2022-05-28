@@ -2,12 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RegisterRequest;
+use App\DTO\UserDataTransferObject;
+use App\Http\Requests\UserSearchRequest;
+use App\Http\Requests\UserUpdateRequest;
+use App\Models\Book;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Repositories\UserRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
+use Spatie\Permission\Models\Role;
+
 //TODO: Добавить сюда репу
 class UserController extends Controller
 {
+    private $userRepository;
+
+     /**
+     *
+     * @param AuthorRepositoryInterface $authorRepository
+     */
+    public function __construct(UserRepositoryInterface $userRepository){
+        $this->userRepository = $userRepository;
+        $this->authorizeResource(User::class);
+    }
     /**
      * Add filter to resource list for policy action
      * 
@@ -34,7 +51,7 @@ class UserController extends Controller
      * 
      * @return array 
      */
-    protected function resourceMethodsWithoutModels()
+    protected function resourceMethodsWithoutModels(): array
     {
         return ['index', 'create', 'store'];
     }
@@ -43,107 +60,151 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(UserSearchRequest $request)
     {
-        return response()->json(User::all('id', 'name'));
-    }
 
+        $usersArray = $this->userRepository->getBySearch(new UserDataTransferObject(
+            $request->name,
+            $request->email,
+            $request->verified,
+            $request->roles
+        ));
+        return response()->view('user.list',[
+            'users'=>$usersArray,
+            'request'=>$request,
+            'roles'=>Role::all()->pluck('name'),
+            'pageTitle' => __('Пользователи')
+        ]);
+    }
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  User $user
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $user)
     {
-        return response()->json(User::query()->find($id));
+        return response()->view('user.show',[
+            'user_class'=>User::class,
+            'book_class'=>Book::class,
+            'target_user'=>$user,
+            'user'=>Auth::user(),
+            'pageTitle' => __($user->name)
+        ]);
+    }
+    /**
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return response()->redirectTo('register');
+    }
+    /**
+     * @return \Illuminate\Http\Response
+     */
+    public function store()
+    {
+        return response()->redirectTo('register');
+    }
+    /**
+     *
+     * @param  User $user
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(User $user)
+    {
+        return response()->view('user.edit',[
+            'user'=>$user,
+            'pageTitle' => __($user->name)
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  UserUpdateRequest  $request
+     * @param  User $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UserUpdateRequest $request, User $user)
     {
-        $user = User::query()->find($id);
-        $user->update(array_merge(
-            $request->only('name', 'email'),
-            ['password' => bcrypt($request->password)],
-        ));
-        if(!$user->hasAnyRole(['admin', 'librarian'])||($request->role != 'admin')||($request->role!='librarian')){
-            $user->assignRole($request->role);
-        }
-        return response()->json($user);
+        $userDTO = new UserDataTransferObject(
+            $request->name,
+            $request->email,
+            ($request->email==$user->email) ? null : false
+        );
+        $this->userRepository->update($user->id, $userDTO);
+        // $user->update(array_merge(
+        //     $request->only('name', 'email'),
+        //     ['password' => bcrypt($request->password)],
+        // ));
+        return response()->redirectToRoute('user.show',['user' => $user->id]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  User $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        $result = false;
-        $user = User::query()->find($id);
-        if(!$user->hasAnyRole(['admin', 'librarian'])){
-            $result = response()->json($user->delete());
-        }
-        return response()->json($result);
+        if (Auth::user()->id == $user->id) 
+            return redirect()->back()->with('error', 'Вы не можете удалить себя');
+        return $this->userRepository->delete($user->id) ? 
+            response()->redirectToRoute('user.index')->with('success', 'Пользователь удалён') :
+            response()->redirectToRoute('user.index')->with('error', 'Не удалось удалить пользователя');
     }
     /**
      * Set to user an moderator permissions
      *
-     * @param  int  $id
+     * @param  User $user
      * @return \Illuminate\Http\Response
      */
-    public function op($id)
+    public function op(User $user)
     {
-        $user = User::query()->find($id);
-        $user->assignRole('librarian');
-        return response()->json($user);
+        if (Auth::user()->id == $user->id) 
+            return redirect()->back()->with('error', 'Вы не можете повысить себя');
+        $user->assignRole('Библиотекарь');
+        return response()->redirectToRoute('user.show',['user' => $user->id]);
     }
     /**
      * Remove an moderator permissions
      *
-     * @param  int  $id
+     * @param  User $user
      * @return \Illuminate\Http\Response
      */
-    public function deop($id)
+    public function deop(User $user)
     {
-        $user = User::query()->find($id);
-        $user->removeRole('librarian');
-        return response()->json($user);
+        if (Auth::user()->id == $user->id) 
+            return redirect()->back()->with('error', 'Вы не можете понизить себя');
+        $user->removeRole('Библиотекарь');
+        return response()->redirectToRoute('user.show',['user' => $user->id]);
     }
     /**
-     * Set to user an moderator permission
+     * Ban user
      *
-     * @param  int  $id
+     * @param  User $user
      * @return \Illuminate\Http\Response
      */
-    public function ban($id)
+    public function ban(User $user)
     {
-        $user = User::query()->find($id);
-        if(!$user->hasAnyRole(['admin', 'librarian'])){
-            $user->syncRoles(['banned']);
-        }
-        return response()->json($user);
+        if (Auth::user()->id == $user->id) 
+            return redirect()->back()->with('error', 'Вы не можете заблокировать себя');
+        $user->syncRoles(['Заблокированный']);
+        return response()->redirectToRoute('user.show',['user' => $user->id]);
     }
     /**
-     * Set to user an moderator permission
+     * unban user
      *
-     * @param  int  $id
+     * @param  User $user
      * @return \Illuminate\Http\Response
      */
-    public function unban($id)
+    public function unban(User $user)
     {
-        $user = User::query()->find($id);
-        if(!$user->hasRole('banned')){
-            $user->syncRoles(['reader']);
-        }
-        return response()->json($user);
+        if (Auth::user()->id == $user->id) 
+            return redirect()->back()->with('error', 'Вы не можете разблокировать себя');
+        $user->syncRoles(['Читатель']);
+        return response()->redirectToRoute('user.show',['user' => $user->id]);
     }
 }

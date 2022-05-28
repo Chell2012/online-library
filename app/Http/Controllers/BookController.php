@@ -9,6 +9,7 @@ use App\DTO\FilterDataTransferObject;
 use App\Http\Requests\ApproveRequest;
 use App\Http\Requests\BookFilterRequest;
 use App\Http\Requests\LoadFromRequest;
+use App\Jobs\LoadBooks;
 use App\Models\Book;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -75,11 +76,12 @@ class BookController extends Controller
             $request->link,
             $request->description,
             $request->author_id,
-            $request->tag_id
+            $request->tag_id,
+            'manualy'
         );
         $book = $this->bookService->new($bookDTO, Auth::id());
         return ($book!=null) ?
-            response()->redirectToRoute('book.show',['id'=>$book->id]) :
+            response()->redirectToRoute('book.show',['book'=>$book->id]) :
             redirect()->back()->with('error','Проверьте введённые данные');
     }
 
@@ -143,7 +145,8 @@ class BookController extends Controller
             $request->link,
             $request->description,
             $request->author_id,
-            $request->tag_id
+            $request->tag_id,
+            null
         );
         $bookUpdate = $this->bookService->update($bookDTO, $book->id);
         return ($bookUpdate)?
@@ -183,7 +186,7 @@ class BookController extends Controller
      * @return RedirectResponse
      */
     public function loadfrom(LoadFromRequest $request){
-        return ($this->bookService->yandexBooksLoader($request->path, $request->user()->id)) ?
+        return (LoadBooks::dispatch($this->bookService,$request->path, $request->user()->id)) ?
             redirect()->back()->with('success', 'Книги добавлены') :
             redirect()->back()->with('error', 'Что-то пошло не так');
     }

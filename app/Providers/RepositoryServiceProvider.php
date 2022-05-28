@@ -13,6 +13,8 @@ use App\Repositories\TagRepository;
 use App\Repositories\TagRepositoryInterface;
 use App\Repositories\PublisherRepository;
 use App\Repositories\PublisherRepositoryInterface;
+use App\Repositories\UserRepositoryInterface;
+use App\Repositories\UserRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(CategoryRepositoryInterface::class, CategoryRepository::class);
         $this->app->bind(PublisherRepositoryInterface::class, PublisherRepository::class);
         $this->app->bind(TagRepositoryInterface::class, TagRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 
     /**

@@ -20,7 +20,7 @@ abstract class ResoucePolicy
      */
     public function viewOnlyApproved(?User $user)
     {
-        return true;
+        return $user->can('view-'.$this->getModelClass());
     }
 
     /**
@@ -43,14 +43,10 @@ abstract class ResoucePolicy
      */
     public function view(?User $user, Model $model)
     {
-        // if (
-        //     $model->approved > 0 
-        //     || ($user!=null ? $user->can('view-not-approved-'.$this->getModelClass()) : false)
-        // ) {
-        //     return true;
-        // }
-        // return false;
-        return true;
+        if ($model->approved > 0){
+            return $user->can('view-'.$this->getModelClass());
+        }
+        return $user->can('view-not-approved-'.$this->getModelClass());
     }
     
     /**

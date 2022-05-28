@@ -44,7 +44,7 @@ class AuthServiceProvider extends ServiceProvider
     private function defineAdmin(): ?bool
     {
         Gate::before(function(User $user) {
-            return ($user->hasRole('admin') ? true : null);
+            return ($user->hasRole('Администратор') ? true : null);
         });
         return null;
     }

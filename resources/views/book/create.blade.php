@@ -96,7 +96,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label> Ссылка на папку</label>
-                            <input name="path" type="text" class="form-control form-control-border" placeholder="Ссылка" value={{ old('path') }}>
+                            <input name="path" type="text" class="form-control form-control-border" placeholder="Ссылка" value={{ 'https://disk.yandex.ru/d/858t9RtldfSoE' }}>
                         </div>
                     </div>
                 </div>

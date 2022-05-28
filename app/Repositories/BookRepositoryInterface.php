@@ -15,6 +15,7 @@ use App\Models\Book;
 use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 /**
  *
@@ -46,6 +47,12 @@ interface BookRepositoryInterface
      * @return Book|null
      */
     public function getById(int $id): ?Book;
+    /**
+     * Get last loading date from specific source
+     * @param string $source
+     * @return Carbon|null
+     */
+    public function getLastDateFrom(string $source): ?Carbon;
     /**
      * Update record if it exists
      * 

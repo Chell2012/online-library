@@ -16,7 +16,7 @@ class UserPolicy
      */
     protected function getModelClass(): string
     {
-        return Tag::class;
+        return User::class;
     }
 
     /**
@@ -26,9 +26,9 @@ class UserPolicy
      * @param  \App\Models\User  $model
      * @return mixed
      */
-    public function view(?User $user, ?User $model)
+    public function view(?User $user, User $model = null)
     {
-        return true;
+        return ($user->can('view-'.$this->getModelClass()) || ($user->id == $model->id));
     }
 
     /**
@@ -51,7 +51,7 @@ class UserPolicy
      */
     public function update(User $user, User $model)
     {
-        return $user->can('update-'.$this->getModelClass());
+        return (($user->can('update-'.$this->getModelClass()) && (!$model->hasAnyRole(['Администратор', 'Библиотекарь']))) || ($user->id == $model->id));
     }
 
     /**
@@ -63,6 +63,12 @@ class UserPolicy
      */
     public function delete(User $user, User $model)
     {
+        if ($user->can('delete-'.$this->getModelClass())){
+            if ($model->hasAnyRole(['Администратор', 'Библиотекарь'])){
+                return false;
+            }
+            return true;
+        }
         return $user->can('delete-'.$this->getModelClass());
     }
 
@@ -99,7 +105,13 @@ class UserPolicy
      */
     public function ban(User $user, User $model)
     {
-        return $user->can('ban-'.$this->getModelClass());
+        if ($user->can('ban-'.$this->getModelClass())){
+            if ($model->hasAnyRole(['Администратор', 'Библиотекарь'])){
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -22,18 +22,18 @@ class UserSeeder extends Seeder
             'email' => Str::random(10).'@gmail.com',
             'password' => Hash::make('SayInvalidOneMoreTime'),
         ]);
-        User::query()->where('name','admin')->first('*')->assignRole('admin');
+        User::query()->where('name','admin')->first('*')->assignRole('Администратор');
         DB::table('users')->insert([
             'name' => 'librarian',
             'email' => Str::random(10).'@gmail.com',
             'password' => Hash::make('SayInvalidOneMoreTime'),
         ]);
-        User::query()->where('name','librarian')->first('*')->assignRole('librarian');
+        User::query()->where('name','librarian')->first('*')->assignRole('Библиотекарь');
         DB::table('users')->insert([
             'name' => 'reader',
             'email' => Str::random(10).'@gmail.com',
             'password' => Hash::make('SayInvalidOneMoreTime'),
         ]);
-        User::query()->where('name','reader')->first('*')->assignRole('reader');
+        User::query()->where('name','reader')->first('*')->assignRole('Читатель');
     }
 }

@@ -28,7 +28,7 @@ class PermissionsSeeder extends Seeder
 
     private function seedRoles(): void
     {
-        Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        Role::create(['name' => 'Администратор', 'guard_name' => 'web']);
 
         foreach ($this->data as $roleName => $perms) {
             $role = Role::create(['name' => $roleName, 'guard_name' => 'web']);

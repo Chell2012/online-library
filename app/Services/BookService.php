@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Auth;
 use App\DTO\BookDataTransferObject;
 use App\DTO\FilterDataTransferObject;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Description of BookService
@@ -161,32 +163,39 @@ class BookService
     public function yandexBooksLoader(string $path, int $userID) :bool
     {
         $offset = 0;
+        $lastDate = $this->bookRepository->getLastDateFrom($path);
         do {
             $response = Http::get('https://cloud-api.yandex.net/v1/disk/public/resources', [
                 'public_key' => $path,
                 'limit' => 20,
-                'offset'=> $offset
+                'offset'=> $offset,
+                'sort'=> "-created"
             ]);
             $total = $response["_embedded"]["total"];
             $offset = $response["_embedded"]["offset"];
             $items = $response["_embedded"]["items"];
             foreach ($items as $id => $item){
                 if ($item["type"] == "file"){
-                    $bookDTO = new BookDataTransferObject(
-                        $item["name"],
-                        1,
-                        null,
-                        null,
-                        1,
-                        $response["public_url"].$item["path"],
-                        null,
-                        null,
-                        null
-                    );
-                    if ($this->new($bookDTO, $userID) == null){
-                        return false;
+                    if (Carbon::createFromFormat("Y-m-d\TH:i:sP", $item["created"])<=$lastDate) {
+                        return true;
+                    } else {
+                        $bookDTO = new BookDataTransferObject(
+                            $item["name"],
+                            1,
+                            null,
+                            null,
+                            1,
+                            $response["public_url"].$item["path"],
+                            null,
+                            null,
+                            null,
+                            $path
+                        );
+                        if ($this->new($bookDTO, $userID) == null){
+                            return false;
+                        }
+                        //TODO: обработать ошибку на случай, если не добавилось надо бы
                     }
-                    //TODO: обработать ошибку на случай, если не добавилось надо бы
                 }
             }
             $offset+=20;

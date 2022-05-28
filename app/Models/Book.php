@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $user_id id of user that book
  * @property string $link book storage link
  * @property string $description book description
+ * @property string $source how book was load
  *
  */
 class Book extends Model
@@ -32,7 +33,8 @@ class Book extends Model
         'category_id',
         'user_id',
         'link',
-        'description'
+        'description',
+        'source'
     ];
 
     /**

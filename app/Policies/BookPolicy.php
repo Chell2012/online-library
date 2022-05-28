@@ -27,7 +27,7 @@ class BookPolicy
      */
     public function viewOnlyApproved(?User $user)
     {
-        return true;
+        return $user->can('view-'.$this->getModelClass());
     }
 
     /**
@@ -59,7 +59,7 @@ class BookPolicy
         //     }
         //     return false;
         // }
-        return true;
+        return $user->can('view-'.$this->getModelClass());
     }
 
     /**
@@ -129,7 +129,7 @@ class BookPolicy
      */
     public function filter(?User $user)
     {
-        return true;
+        return $user->can('view-'.$this->getModelClass());
     }
 
 }

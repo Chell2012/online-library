@@ -24,6 +24,7 @@ class BookDataTransferObject
     private $description;
     private $authorsIds;
     private $tagsIds;
+    private $source;
     
     /**
      * 
@@ -36,6 +37,7 @@ class BookDataTransferObject
      * @param string|null $description
      * @param array $authorsIds
      * @param array $tagsIds
+     * @param string|null $source
      */
     public function __construct(
             string $title,
@@ -46,7 +48,8 @@ class BookDataTransferObject
             string $link,
             ?string $description,
             ?array $authorsIds,
-            ?array $tagsIds
+            ?array $tagsIds,
+            ?string $source
             )
     {
         $this->title = $title;
@@ -58,6 +61,7 @@ class BookDataTransferObject
         $this->description = $description;
         $this->authorsIds = $authorsIds;
         $this->tagsIds = $tagsIds;
+        $this->source = $source;
     }
     /**
      * 
@@ -130,5 +134,12 @@ class BookDataTransferObject
     public function getTitle(): string
     {
         return $this->title;
+    }
+    /**
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->source;
     }
 }

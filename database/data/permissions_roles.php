@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'librarian' => [
+    'Библиотекарь' => [
         'App\\Models\\Author' => [
             'view',
             'view-not-approved',
@@ -51,7 +51,7 @@ return [
             'unban'
         ]
     ],
-    'reader' => [
+    'Читатель' => [
         'App\\Models\\Author' => [
             'view',
             'create',
@@ -74,10 +74,9 @@ return [
             'create',
         ],
         'App\\Models\\User' => [
-            'view',
         ]
     ],
-    'banned' => [
+    'Заблокированный' => [
         'App\\Models\\Author' => [
         ],
         'App\\Models\\Book' => [
