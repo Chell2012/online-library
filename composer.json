@@ -13,9 +13,7 @@
         "infyomlabs/laravel-ui-adminlte": "^3.2",
         "jeroennoten/laravel-adminlte": "^3.8",
         "laravel/framework": "^8.12",
-        "laravel/passport": "^10.1",
         "laravel/tinker": "^2.5",
-        "league/oauth2-server": "^8.2",
         "spatie/laravel-permission": "^4.2"
     },
     "require-dev": {
