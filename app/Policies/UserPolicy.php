@@ -125,4 +125,15 @@ class UserPolicy
     {
         return $user->can('unban-'.$this->getModelClass());
     }
+    /**
+     * Determine whether the user can allow oter user
+     *
+     * @param  \App\Models\User  $user
+     * @param  \App\Models\User  $model
+     * @return mixed
+     */
+    public function allowUser(User $user, User $model)
+    {
+        return ($user->can('update-'.$this->getModelClass()) && !$model->hasAnyRole(['Администратор', 'Библиотекарь', 'Заблокированный']));
+    }
 }

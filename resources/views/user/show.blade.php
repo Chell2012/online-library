@@ -45,7 +45,15 @@
                     <div class="col-md-2">
                         <form action="{{ route('user.unban',$target_user->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-success">Разблокировать</button>
+                            <button type="submit" class="btn btn-warning">Разблокировать</button>
+                        </form>
+                    </div>
+                @endif
+                @if (($user->can('update-'.$user_class)) && (!$target_user->hasAnyRole(['Администратор', 'Библиотекарь', 'Читатель', 'Заблокированный'])))
+                    <div class="col-md-2">
+                        <form action="{{ route('user.allow',$target_user->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-success">Сделать читателем</button>
                         </form>
                     </div>
                 @endif

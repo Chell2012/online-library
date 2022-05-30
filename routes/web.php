@@ -63,5 +63,6 @@ Route::middleware(['auth','verified'])->group(function (){
     Route::post('/user/deop/{user}', [UserController::class,'deop'])->name('user.deop');
     Route::post('/user/ban/{user}', [UserController::class,'ban'])->name('user.ban');
     Route::post('/user/unban/{user}', [UserController::class,'unban'])->name('user.unban');
+    Route::post('/user/allow/{user}', [UserController::class,'allowUser'])->name('user.allow');
 });
 
