@@ -11,6 +11,7 @@ use App\Http\Requests\BookFilterRequest;
 use App\Http\Requests\LoadFromRequest;
 use App\Jobs\LoadBooks;
 use App\Models\Book;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,35 @@ class BookController extends Controller
     {
         $this->bookService=$bookService;
         $this->authorizeResource(Book::class);
+    }
+    /**
+     * Add filter to resource list for policy action
+     *
+     * @return array
+     */
+    protected function resourceAbilityMap()
+    {
+        return [
+            'index' => 'viewOnlyApproved',
+            'viewNotApproved' => 'viewAny',
+            'show' => 'view',
+            'create'=>'create',
+            'store' => 'create',
+            'edit' => 'update',
+            'update' => 'update',
+            'destroy' => 'delete',
+            'approve' => 'approve',
+            'loadfrom' => 'approve'
+        ];
+    }
+    /**
+     * Add filter to actions without model dependency for policy action
+     *
+     * @return array
+     */
+    protected function resourceMethodsWithoutModels(): array
+    {
+        return ['viewNotApproved', 'index', 'create', 'store', 'approve', 'loadfrom'];
     }
 
     /**
@@ -95,7 +125,7 @@ class BookController extends Controller
         return response()->view('book.create', [
             'pageTitle' => __('Новая книга'),
             'book_class'=>Book::class,
-            'user'=>Auth::user(),
+            'user'=>Auth::user()
         ]);
     }
     /**

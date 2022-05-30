@@ -44,6 +44,7 @@ class UserController extends Controller
             'deop' => 'deop',
             'ban' => 'ban',
             'unban' => 'unban',
+            'allowUser'=>'allowUser'
         ];
     }
     /**
@@ -207,4 +208,18 @@ class UserController extends Controller
         $user->syncRoles(['Читатель']);
         return response()->redirectToRoute('user.show',['user' => $user->id]);
     }
+    /**
+     * unban user
+     *
+     * @param  User $user
+     * @return \Illuminate\Http\Response
+     */
+    public function allowUser(User $user)
+    {
+        if (Auth::user()->id == $user->id) 
+            return redirect()->back()->with('error', 'Вы не можете пригласить себя');
+        $user->syncRoles(['Читатель']);
+        return response()->redirectToRoute('user.show',['user' => $user->id]);
+    }
+    
 }

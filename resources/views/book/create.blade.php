@@ -83,12 +83,11 @@
             <button type="submit" class="btn btn-primary" form="create-form">Сохранить</button>
         </div>
     </div>
-
+    @if ($user->can('approve-'.$book_class))
     <div class="card card-primary">
         <div class="card-header">
             <h3 class="card-title">Массовая загрузка с Yandex.Disc</h3>
         </div>
-
         <div class="card-body">
             <form id="load-from-form" action="{{ route('book.loadfrom') }}" method="POST">
                 @csrf
@@ -106,6 +105,7 @@
             <button type="submit" class="btn btn-primary" form="load-from-form">Загрузить</button>
         </div>
     </div>
+    @endif
 @endsection
 
 @section('js')
