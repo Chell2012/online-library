@@ -44,6 +44,7 @@ class PublisherController extends Controller
         return ($request->return_json)?
             response()->json($publishers) :
             response()->view('publisher.list',[
+                'approves_list'=>$request->approved,
                 'publisher_class'=>Publisher::class,
                 'user'=>$request->user(),
                 'approved_status'=>require_once database_path("data/status_list.php"),

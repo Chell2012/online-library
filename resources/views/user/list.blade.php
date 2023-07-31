@@ -46,7 +46,6 @@
                                     <option value="{{ $role }}" {{ in_array($role,  $request->roles ? $request->roles : []) ? 'selected' : ''}}>{{ $role }}</option>
                                 @endforeach
                             </select>
-                            <?php print_r($request->roles); ?>
                         </div>
                     </div>
                 </div>

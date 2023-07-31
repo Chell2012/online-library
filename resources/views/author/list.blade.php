@@ -49,7 +49,13 @@
                                 <label>Статус</label>
                                 <select id="status" name="approved[]" class="form-control approve-selection" multiple="multiple">
                                     @foreach($approved_status as $status => $status_name)
-                                        <option value="{{ $status }}">{{ $status_name }}</option>
+                                        <option value="{{ $status }}"
+                                                @if($approves_list != null)
+                                                @foreach($approves_list as $selected_status)
+                                                {{$selected_status == $status?"selected":""}}
+                                                @endforeach
+                                                @endif
+                                                >{{ $status_name }}</option>
                                     @endforeach
                                 </select>
                             </div>

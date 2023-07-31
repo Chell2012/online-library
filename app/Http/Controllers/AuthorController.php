@@ -54,11 +54,12 @@ class AuthorController extends Controller
         return ($request->return_json)?
             response()->json($authors) :
             response()->view('author.list',[
-            'author_class'=>Author::class,
-            'user'=>$request->user(),
-            'approved_status'=>require_once database_path("data/status_list.php"),
-            'authors'=>$authors,
-            'pageTitle' => __('Авторы'),
+                'approves_list'=>$request->approved,
+                'author_class'=>Author::class,
+                'user'=>$request->user(),
+                'approved_status'=>require_once database_path("data/status_list.php"),
+                'authors'=>$authors,
+                'pageTitle' => __('Авторы'),
         ]);
     }
 

@@ -80,6 +80,7 @@ class BookController extends Controller
             $request->sortBy
         ));
         return response()->view('book.filter', [
+            'approves_list'=>$request->approved,
             'book_class'=>Book::class,
             'user'=>$request->user(),
             'approved_status'=>require_once database_path("data/status_list.php"),

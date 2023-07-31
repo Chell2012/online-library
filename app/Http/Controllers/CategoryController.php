@@ -46,6 +46,7 @@ class CategoryController extends Controller
         return ($request->return_json)?
             response()->json($categories) :
             response()->view('category.list',[
+                'approves_list'=>$request->approved,
                 'category_class'=>Category::class,
                 'user'=>$request->user(),
                 'approved_status'=>require_once database_path("data/status_list.php"),

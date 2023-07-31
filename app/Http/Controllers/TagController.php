@@ -49,11 +49,12 @@ class TagController extends Controller
         return ($request->return_json)?
             response()->json($tags) :
             response()->view('tag.list',[
-            'tag_class'=>Tag::class,
-            'user'=>$request->user(),
-            'approved_status'=>require_once database_path("data/status_list.php"),
-            'tags'=>$tags,
-            'pageTitle' => __('Темы'),
+                'approves_list'=>$request->approved,
+                'tag_class'=>Tag::class,
+                'user'=>$request->user(),
+                'approved_status'=>require_once database_path("data/status_list.php"),
+                'tags'=>$tags,
+                'pageTitle' => __('Темы'),
         ]);
     }
 
